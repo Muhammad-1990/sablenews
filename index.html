@@ -73,7 +73,7 @@
       </template>
     </div>
   </div>
-  
+
 </body>
 
  <script>
@@ -109,7 +109,7 @@
         },
         
         async fetchPosts(category) {
-          const res = await fetch("https://dev-sableint.1stcontact.com/api/blogapp/blogposts?$select=Id,Title,Summary,BlogPostMetaTags&$orderby=PublicationDate desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$top=20");
+          const res = await fetch("https://www.sableinternational.com/api/blogapp/blogposts?$orderby=LastModified desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c");
           const data = await res.json();
           this.posts = (data.value || data).map(post => ({
             ...post,
@@ -123,7 +123,7 @@
           this.overlayDismissed = false;
           this.loading = true;
           try {
-            const res = await fetch(`https://dev-sableint.1stcontact.com/api/blogapp/blogposts(${id})?$select=Id,Title,Summary,Content`);
+            const res = await fetch(`https://www.sableinternational.com/api/blogapp/blogposts(${id})?$select=Id,Title,Summary,Content`);
             const data = await res.json();
             this.activePost = data;
           } catch (err) {

@@ -4,8 +4,8 @@ var filesToCache = [
     '/index.html',
     '/manifest.json',
     '/favicon.ico',
-    '/assets/manifest-icon-192.png',
-    '/assets/manifest-icon-512.png'
+    '/manifest-icon-192.png',
+    '/manifest-icon-512.png'
 ];
 
 /* Start the service worker and cache all of the app's content */

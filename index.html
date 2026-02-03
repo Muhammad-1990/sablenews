@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html lang="en" x-data="blogApp()" x-init="init()">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="theme-color" content="#1d90f5" />
+    <meta name="Description" content="Sable News">
+    <meta name="author" content="github.com/Muhammad-1990/sablenews">
+    <title>Hashmonic</title>
+    <meta name="description" content="Sable News">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Sable News">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="msapplication-TileColor" content="#1d90f5">
+
+    <meta property="og:title" content="Sable News" />
+    <meta property="og:description " content="Sable News" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://muhammad-1990.github.io/sablenews/" />
+    <meta property="og:image" content="https://muhammad-1990.github.io/sablenews/assets/manifest-icon-512.png" />
+
+    <meta name="github" content="github.com/muhammad-1990/hashmonic" />
+    <meta name="twitter" content="@hashmonic" />
+    <meta name="email" content="hashmonic@gmail.com" />
+
+
+    <link rel="icon" href="https://muhammad-1990.github.io/sablenews/favicon.ico" type="image/x-icon" />
+    <link rel="manifest" href="https://muhammad-1990.github.io/sablenews/manifest.json" />
+    <link rel="apple-touch-icon" href="https://muhammad-1990.github.io/sablenews/assets/manifest-icon-512.png"/>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TikTok-Style Blog</title>
@@ -39,10 +66,10 @@
   <!-- Snap Feed -->
   <main class="h-screen overflow-y-scroll snap-y snap-mandatory pt-14">
     <template x-for="post in posts" :key="post.Id">
-      <section class="h-screen w-full relative snap-start cursor-pointer" @click="openPost(post.Id)">
+      <section class="h-screen w-full relative snap-start cursor-pointer">
         <img :src="post.meta?.image" alt="" class="absolute inset-0 w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-        <div class="absolute bottom-0 p-6">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/100 to-transparent"></div>
+        <div class="absolute bottom-0 p-6" @click="openPost(post.Id)">
           <h2 class="text-2xl font-bold" x-text="post.Title"></h2>
           <p class="mt-2 text-sm text-gray-200" x-text="post.Summary"></p>
         </div>

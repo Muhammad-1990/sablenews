@@ -1,14 +1,27 @@
-const CACHE_NAME = "pwa-blog-v1";
-const urlsToCache = ["index.html", "assets/tailwind.css"];
+var cacheName = 'sable-blog-v1';
+var filesToCache = [
+    '/service-worker.js',
+    '/index.html',
+    '/manifest.json',
+    '/favicon.ico',
+    '/assets/manifest-icon-192.png',
+    '/assets/manifest-icon-512.png'
+];
 
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-  );
+/* Start the service worker and cache all of the app's content */
+self.addEventListener('install', function (e) {
+    e.waitUntil(
+        caches.open(cacheName).then(function (cache) {
+            return cache.addAll(filesToCache);
+        })
+    );
 });
 
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
-  );
+/* Serve cached content when offline */
+self.addEventListener('fetch', function (e) {
+    e.respondWith(
+        caches.match(e.request).then(function (response) {
+            return response || fetch(e.request);
+        })
+    );
 });

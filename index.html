@@ -74,16 +74,15 @@
     </main>
 
     <!-- Article Overlay -->
-    <div class="fixed inset-x-0 bottom-0 bg-white text-black z-50 transform transition-transform duration-300 ease-in-out"
-        x-show="showArticle" x-ref="overlay"
-        :class="overlayDismissed ? 'translate-y-full' : (overlayExpanded ? 'translate-y-0' : 'translate-y-1/2')"
-        style="max-height: 100vh;" @touchstart="startY = $event.touches[0].clientY"
+    <div class="fixed inset-x-0 bottom-0 bg-white text-black z-50 overflow-hidden transition-all duration-300 ease-in-out"
+        x-show="showArticle" x-ref="overlay" :class="closing ? 'h-0 opacity-0' : (overlayExpanded ? 'h-screen opacity-100' : 'h-[50vh] opacity-100')" 
+        @touchstart="startY = $event.touches[0].clientY"
         @touchend="endY = $event.changedTouches[0].clientY; handleSwipe()">
-        <!-- Scrollable content -->
         <div class="overflow-y-auto p-6 h-full">
             <template x-if="activePost">
                 <div>
-                    <h2 class="text-2xl font-bold mb-4" x-text="activePost.Title"></h2>
+                    <h2 class="text-2xl font-bold" x-text="activePost.Title"></h2>
+                    <p class="mt-2 mb-4 text-gray-600" x-text="activePost.Summary"></p>
                     <div class="prose prose-lg max-w-none" x-html="activePost.Content"></div>
                 </div>
             </template>
@@ -119,7 +118,7 @@
             activePost: null,
             showArticle: false,
             overlayExpanded: false,
-            overlayDismissed: false,
+            closing: false,
             loading: false,
             startY: 0,
             endY: 0,
@@ -128,7 +127,7 @@
             },
 
             async fetchPosts(category) {
-                const res = await fetch("https://www.sableinternational.com/api/blogapp/blogposts?$orderby=LastModified desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c");
+                const res = await fetch("https://www.sableinternational.com/api/blogapp/blogposts?$orderby=LastModified desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$top=5");
                 const data = await res.json();
                 this.posts = (data.value || data).map(post => ({
                     ...post,
@@ -137,10 +136,11 @@
             },
 
             async openPost(id) {
-                this.showArticle = true;
-                this.overlayExpanded = false; // start half-height
-                this.overlayDismissed = false;
                 this.loading = true;
+                this.closing = true;
+                this.showArticle = true;
+                this.overlayExpanded = false;
+                setTimeout(() => { this.closing = false; }, 10);
                 try {
                     const res = await fetch(`https://www.sableinternational.com/api/blogapp/blogposts(${id})?$select=Id,Title,Summary,Content`);
                     const data = await res.json();
@@ -158,13 +158,17 @@
                     // swipe up expands overlay
                     this.overlayExpanded = true;
                 } else if (delta < -50) {
+                    // swipe down
                     if (this.overlayExpanded) {
                         // collapse back to half
                         this.overlayExpanded = false;
                     } else {
                         // dismiss overlay entirely
-                        this.overlayDismissed = true;
-                        this.showArticle = false;
+                        this.closing = true;
+                        setTimeout(() => { 
+                            this.showArticle = false; 
+                            this.closing = false; 
+                        }, 300);
                     }
                 }
             }

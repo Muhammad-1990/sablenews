@@ -1,8 +1,8 @@
 {
   "name": "My PWA Blog",
-  "title": "Hashmonic",
+  "title": "Sablle News",
   "short_name": "Blog",
-  "description": "Confidently store encrypted data digitally.",
+  "description": "sablenews - Your source for the latest updates and articles from Sable International.",
   "start_url": "index.html",
   "scope": "/",
   "display": "standalone",

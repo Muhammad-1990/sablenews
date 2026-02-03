@@ -74,7 +74,7 @@
     </main>
 
     <!-- Article Overlay -->
-    <div class="fixed inset-x-0 bottom-0 bg-white text-black z-50 overflow-hidden transition-all duration-300 ease-in-out"
+    <div class="fixed inset-x-0 bottom-0 bg-white text-black z-50 overflow-hidden transition-all duration-300 ease-in-out rounded-t-3xl shadow-2xl"
         x-show="showArticle" x-ref="overlay" :class="closing ? 'h-0 opacity-0' : (overlayExpanded ? 'h-screen opacity-100' : 'h-[50vh] opacity-100')" 
         @touchstart="startY = $event.touches[0].clientY"
         @touchend="endY = $event.changedTouches[0].clientY; handleSwipe()">

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" x-data="blogApp()" x-init="init()">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TikTok-Style Blog</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs" defer></script>
+  <style>
+    /* Snap scrolling */
+    .snap-y {
+      scroll-snap-type: y mandatory;
+    }
+    .snap-start {
+      scroll-snap-align: start;
+    }
+  </style>
+</head>
+<body 
+  class="bg-black text-white" 
+  :class="showArticle ? 'overflow-hidden' : ''" 
+  x-data="blogApp()" 
+  x-init="init()"
+>
+  <!-- Category Tabs -->
+  <!-- <nav class="fixed top-0 left-0 right-0 z-50 bg-black text-white border-b border-gray-800 overflow-x-auto">
+    <div class="flex space-x-4 px-4 py-2">
+      <template x-for="cat in categories" :key="cat">
+        <button 
+          @click="activeCategory = cat; fetchPosts(cat)" 
+          class="px-4 py-2 rounded-full whitespace-nowrap"
+          :class="activeCategory === cat ? 'bg-white text-black font-semibold' : 'bg-gray-800 text-gray-300'"
+          x-text="cat">
+        </button>
+      </template>
+    </div>
+  </nav> -->
+
+  <!-- Snap Feed -->
+  <main class="h-screen overflow-y-scroll snap-y snap-mandatory pt-14">
+    <template x-for="post in posts" :key="post.Id">
+      <section class="h-screen w-full relative snap-start cursor-pointer" @click="openPost(post.Id)">
+        <img :src="post.meta?.image" alt="" class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+        <div class="absolute bottom-0 p-6">
+          <h2 class="text-2xl font-bold" x-text="post.Title"></h2>
+          <p class="mt-2 text-sm text-gray-200" x-text="post.Summary"></p>
+        </div>
+      </section>
+    </template>
+  </main>
+
+  <!-- Article Overlay -->
+  <div 
+    class="fixed inset-x-0 bottom-0 bg-white text-black z-50 transform transition-transform duration-300 ease-in-out"
+    x-show="showArticle"
+    x-ref="overlay"
+    :class="overlayDismissed ? 'translate-y-full' : (overlayExpanded ? 'translate-y-0' : 'translate-y-1/2')"
+    style="max-height: 100vh;"
+    @touchstart="startY = $event.touches[0].clientY"
+    @touchend="endY = $event.changedTouches[0].clientY; handleSwipe()"
+  >
+    <!-- Scrollable content -->
+    <div class="overflow-y-auto p-6 h-full">
+      <template x-if="activePost">
+        <div>
+          <h2 class="text-2xl font-bold mb-4" x-text="activePost.Title"></h2>
+          <div class="prose prose-lg max-w-none" x-html="activePost.Content"></div>
+        </div>
+      </template>
+      <template x-if="loading">
+        <p class="text-gray-500">Loading...</p>
+      </template>
+    </div>
+  </div>
+  
+</body>
+
+ <script>
+    function parseMetaTags(metaString) {
+      const meta = {};
+      metaString
+        ?.split(/<br\s*\/?>|\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .forEach(line => {
+          const [key, ...rest] = line.split("=");
+          if (key && rest.length) {
+            meta[key.trim()] = rest.join("=").trim();
+          }
+        });
+      return meta;
+    }
+
+    function blogApp() {
+      return {
+        categories: ["All", "Finance", "Travel", "Lifestyle"],
+        activeCategory: "All",
+        posts: [],
+        activePost: null,
+        showArticle: false,
+        overlayExpanded: false,
+        overlayDismissed: false,
+        loading: false,
+        startY: 0,
+        endY: 0,
+        async init() {
+          await this.fetchPosts(this.activeCategory);
+        },
+        
+        async fetchPosts(category) {
+          const res = await fetch("https://dev-sableint.1stcontact.com/api/blogapp/blogposts?$select=Id,Title,Summary,BlogPostMetaTags&$orderby=PublicationDate desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$top=20");
+          const data = await res.json();
+          this.posts = (data.value || data).map(post => ({
+            ...post,
+            meta: parseMetaTags(post.BlogPostMetaTags)
+          }));
+        },
+        
+        async openPost(id) {
+          this.showArticle = true;
+          this.overlayExpanded = false; // start half-height
+          this.overlayDismissed = false;
+          this.loading = true;
+          try {
+            const res = await fetch(`https://dev-sableint.1stcontact.com/api/blogapp/blogposts(${id})?$select=Id,Title,Summary,Content`);
+            const data = await res.json();
+            this.activePost = data;
+          } catch (err) {
+            console.error("Failed to load post", err);
+          } finally {
+            this.loading = false;
+          }
+        },
+        
+        handleSwipe() {
+          const delta = this.startY - this.endY;
+          if (delta > 50) {
+            // swipe up expands overlay
+            this.overlayExpanded = true;
+          } else if (delta < -50) {
+            if (this.overlayExpanded) {
+              // collapse back to half
+              this.overlayExpanded = false;
+            } else {
+              // dismiss overlay entirely
+              this.overlayDismissed = true;
+              this.showArticle = false;
+            }
+          }
+        }
+      }
+    }
+  </script>
+</html>

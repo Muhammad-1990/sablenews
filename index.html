@@ -33,14 +33,29 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs" defer></script>
     <style>
+        /* Aggressive momentum tuning – especially helps iOS */
+main {
+  /* These are not standard, but Safari sometimes respects them indirectly via touch events */
+  touch-action: pan-y;                     /* Allows vertical panning */
+}
         /* Snap scrolling */
-        .snap-y {
-            scroll-snap-type: y mandatory;
-        }
+       .snap-y {
+    scroll-snap-type: y proximity;          /* ← Changed to proximity – try mandatory later */
+    -webkit-overflow-scrolling: touch;      /* Momentum + bounce on iOS */
+    overscroll-behavior-y: contain;
+    will-change: scroll-position;
+    scroll-behavior: smooth;  
+  }
 
-        .snap-start {
-            scroll-snap-align: start;
-        }
+  .snap-start {
+    scroll-snap-align: start;
+    transform: translateZ(0); 
+  }
+
+  /* Optional: smoother scroll feel overall */
+  html {
+    scroll-behavior: smooth;                /* But note: can conflict with snap sometimes */
+  }
 
         @layer utilities {
             .scrollbar-hide {

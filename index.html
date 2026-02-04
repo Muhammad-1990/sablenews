@@ -307,15 +307,13 @@
                     >
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto
-            transition-[transform,height, background-color] 
-            duration-[300ms,300ms,300ms] 
-            ease-out ease-in-out ease-in-out 
-            delay-[0ms,0ms,0ms]" 
-            @click="openPost(post.Id)" @mousedown.outside="showArticle = false"
-                    :class="{
-            'translate-y-0 h-full bg-black': showArticle && activePost?.Id === post.Id,
-            'h-50 translate-y-0 bg-transparent': !showArticle || activePost?.Id !== post.Id
-            }"
+         transition-all duration-700 ease-in-out"
+  @click="openPost(post.Id)"
+  :class="{
+    'h-full bg-black': showArticle && activePost?.Id === post.Id,
+    'h-80 bg-transparent': !showArticle || activePost?.Id !== post.Id
+  }"
+
         @touchstart="startY = $event.touches[0].clientY; "
         @touchmove="
      

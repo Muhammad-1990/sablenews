@@ -29,7 +29,7 @@
     <link rel="icon" href="https://muhammad-1990.github.io/sablenews/favicon.ico" type="image/x-icon" />
     <link rel="manifest" href="https://muhammad-1990.github.io/sablenews/manifest.json" />
     <link rel="apple-touch-icon" href="https://muhammad-1990.github.io/sablenews/manifest-icon-512.png" />
-
+ 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs" defer></script>
     <style>
@@ -303,7 +303,7 @@
             :class="closing ? 'h-0 opacity-0' : (overlayExpanded ? 'h-screen opacity-100' : 'h-[50vh] opacity-100')"
             >
                 <img :src="post.meta?.image" alt=""
-                    class="relative inset-0 w-full h-1/2 object-cover"
+                    class="relative inset-0 w-full h-full object-cover"
                     >
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto
@@ -314,7 +314,7 @@
             @click="openPost(post.Id)" @mousedown.outside="showArticle = false"
                     :class="{
             'translate-y-0 h-full bg-black': showArticle && activePost?.Id === post.Id,
-            'h-1/2 translate-y-0 bg-transparent': !showArticle || activePost?.Id !== post.Id
+            'h-80 translate-y-0 bg-transparent': !showArticle || activePost?.Id !== post.Id
             }"
         @touchstart="startY = $event.touches[0].clientY; "
         @touchmove="
@@ -340,7 +340,7 @@
                         <button @click.stop="toggleBookmark(post.Id)"
                             class="flex flex-col items-center transition-transform duration-200 hover:scale-110 active:scale-90"
                             :class="{ 'text-yellow-400': isBookmarked(post.Id) }">
-                            <svg class="w-8 h-8 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            <svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 32 32"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     :class="{ 'fill-yellow-400 stroke-yellow-400': isBookmarked(post.Id) }"

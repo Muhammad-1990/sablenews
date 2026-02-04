@@ -254,17 +254,14 @@
     <!-- Category Tabs -->
     <nav
     x-show="!showArticle"
-        class=".fade-horizontal fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/100 to-transparent backdrop-blur-sm text-white">
+        class=".fade-horizontal fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm text-white">
         <div class="relative flex items-center justify-between px-4 py-2">
             <!-- Scrollable categories area -->
             <div class="flex-1 overflow-x-auto scrollbar-hide whitespace-nowrap -mx-4 px-4 ">
                 <div class="flex justify-center space-x-4 min-w-max">
                     <template x-for="cat in categories" :key="cat">
                         <button @click="activeCategory = cat; fetchPosts(cat)"
-                            class="relative px-4 py-2 text-xs font-medium transition-colors" :class="{
-                            'text-white': activeCategory === cat,
-                            'text-gray-400 hover:text-gray-200': activeCategory !== cat
-                        }">
+                            class="relative px-4 py-2 text-white text-xs font-medium transition-colors" >
                             <span x-text="cat"></span>
 
                             <!-- Small underline indicator (you had w-6 h-0.5 – kept it) -->
@@ -307,23 +304,18 @@
         @touchstart="startY = $event.touches[0].clientY"
         @touchend="endY = $event.changedTouches[0].clientY; handleSwipe()">
                 <img :src="post.meta?.image" alt=""
-                    class="relative inset-0 w-full h-1/2 object-cover transition-all duration-5000 ease-in-out" 
-                    :class="{
-                        'h-full':showArticle && activePost?.Id === post.Id
-                    }"
+                    class="relative inset-0 w-full h-1/2 object-cover"
                     >
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"
-                :class="{
-                        'bg-gradient-to-b from-black/100 to-black/80 backdrop-blur-md':showArticle && activePost?.Id === post.Id
-                    }"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto active:scale-[0.92] active:shadow-inner active:brightness-95
-            transition-[background-color,transform,height,border-radius,box-shadow] 
-            duration-[100ms,800ms,800ms,0ms,800ms] 
-            ease-out ease-in-out ease-in-out ease-in-out ease-in-out
-            delay-[0ms,400ms,400ms,0ms,400ms]" @click="openPost(post.Id)" @mousedown.outside="showArticle = false"
+            transition-[transform,height, background-color] 
+            duration-[300ms,300ms,300ms] 
+            ease-out ease-in-out ease-in-out 
+            delay-[0ms,0ms,0ms]" 
+            @click="openPost(post.Id)" @mousedown.outside="showArticle = false"
                     :class="{
-            'z-60 translate-y-0 h-full': showArticle && activePost?.Id === post.Id,
-            'bg-transparent text-white h-auto translate-y-0': !showArticle || activePost?.Id !== post.Id
+            'translate-y-0 h-full bg-black': showArticle && activePost?.Id === post.Id,
+            'h-1/2 translate-y-0 bg-transparent': !showArticle || activePost?.Id !== post.Id
             }">
                     <div class="flex justify-between space-x-4 items-center">
                         <p class="text-xs" x-text="getAuthorAndDate(post.meta.author,post.LastModified)"></p>

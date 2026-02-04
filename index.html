@@ -203,35 +203,89 @@
         </div>
     </nav>
 
-    <!-- Snap Feed -->
-    <main class="h-screen snap-y snap-mandatory pt-14" :class="{
-        'overflow-y-scroll': !showArticle,
-        'overflow-y-hidden': showArticle,
-    }">
-        <template x-for="post in posts" :key="post.Id">
-            <section class="h-screen w-full relative snap-start cursor-pointer">
-                <img :src="post.meta?.image" alt=""
-                    class="relative inset-0 w-full h-full object-cover transition-all duration-5000 ease-in-out" :class="{
-                    'h-96':showArticle && activePost?.Id === post.Id
-                }">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/100 to-transparent"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto active:scale-[0.92] active:shadow-inner active:brightness-95
-                       transition-[background-color,transform,height,border-radius,box-shadow] 
-                       duration-[100ms,800ms,800ms,0ms,800ms] 
-                       ease-out ease-in-out ease-in-out ease-in-out ease-in-out
-                       delay-[0ms,400ms,400ms,0ms,400ms]" @click="openPost(post.Id)"
-                    @mousedown.outside="showArticle = false" :class="{
-                    'bg-white text-black rounded-t-3xl shadow-2xl translate-y-0 h-[80vh]': showArticle && activePost?.Id === post.Id,
-                    'bg-transparent text-white h-auto translate-y-0': !showArticle || activePost?.Id !== post.Id
-                }">
-                    <h2 class="text-2xl font-bold" x-text="post.Title"></h2>
-                    <p class="mt-2 text-sm text-gray-200" x-text="post.Summary"></p>
-                    <div class="prose prose-lg max-w-none" x-show="showArticle && activePost?.Id === post.Id"
-                        x-html="post.Content"></div>
-                </div>
-            </section>
-        </template>
-    </main>
+   <!-- Snap Feed -->
+<main class="h-screen snap-y snap-mandatory pt-14"
+   :class="
+   {
+   'overflow-y-scroll': !showArticle,
+   'overflow-y-hidden': showArticle,
+   }"
+   >
+   <template x-for="post in posts" :key="post.Id">
+      <section class="h-screen w-full relative snap-start cursor-pointer">
+         <img :src="post.meta?.image" alt=""
+            class="relative inset-0 w-full h-full object-cover transition-all duration-5000 ease-in-out" :class="{
+            'h-96':showArticle && activePost?.Id === post.Id
+            }">
+         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+         <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto active:scale-[0.92] active:shadow-inner active:brightness-95
+            transition-[background-color,transform,height,border-radius,box-shadow] 
+            duration-[100ms,800ms,800ms,0ms,800ms] 
+            ease-out ease-in-out ease-in-out ease-in-out ease-in-out
+            delay-[0ms,400ms,400ms,0ms,400ms]" @click="openPost(post.Id)"
+            @mousedown.outside="showArticle = false" :class="{
+            'bg-white text-black rounded-t-3xl shadow-2xl translate-y-0 h-[80vh]': showArticle && activePost?.Id === post.Id,
+            'bg-transparent text-white h-auto translate-y-0': !showArticle || activePost?.Id !== post.Id
+            }">
+            <div class="flex justify-between space-x-4 items-center">
+                <p class="text-xs" x-text="getAuthorAndDate(post.meta.author,post.LastModified)"></p>
+                <!-- Bookmark button – inline style -->
+<button 
+  @click.stop="toggleBookmark(post.Id)" 
+  class="flex flex-col items-center transition-transform duration-200 hover:scale-110 active:scale-90"
+  :class="{ 'text-yellow-400': isBookmarked(post.Id) }"
+>
+  <svg class="w-8 h-8 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+    <path 
+      stroke-linecap="round" 
+      stroke-linejoin="round" 
+      :class="{ 'fill-yellow-400 stroke-yellow-400': isBookmarked(post.Id) }" 
+      d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" 
+    />
+  </svg>
+  <span class="text-xs mt-1 font-medium" x-text="post.meta?.bookmarks"></span>
+</button>
+            </div>
+            
+            <h2 class="text-xl font-bold" x-text="post.Title"></h2>
+            <!-- Metadata row – between title and summary -->
+            <div class="flex items-center space-x-6 text-xs my-4 opacity-90">
+               <!-- Likes -->
+               <button 
+                  @click.stop="toggleLike(post.Id)" 
+                  class="flex items-center space-x-1.5 transition-all duration-200 hover:scale-105 active:scale-95"
+                  :class="{ 'text-red-500': isLiked(post.Id) }"
+                  >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  <span x-text="post.meta?.likes || '2.3k'"></span>
+               </button>
+               <!-- Comments -->
+               <button 
+                  @click.stop="openComments(post.Id)" 
+                  class="flex items-center space-x-1.5 transition-all duration-200 hover:scale-105 active:scale-95"
+                  >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                     <path d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z"/>
+                  </svg>
+                  <span x-text="post.meta?.comments || '148'"></span>
+               </button>
+               <!-- Views -->
+               <div class="flex items-center space-x-1.5">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                     <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                  </svg>
+                  <span x-text="post.meta?.views || '45k'"></span>
+               </div>
+            </div>
+            <p class="mt-2 text-sm text-gray-200" x-text="post.Summary" x-show="!showArticle"></p>
+            <div class="prose prose-lg max-w-none" x-show="showArticle && activePost?.Id === post.Id"
+               x-html="post.Content"></div>
+         </div>
+      </section>
+   </template>
+</main>
 
     <!--
      translate-y-0 h-[80vh]
@@ -279,8 +333,8 @@
 
     function blogApp() {
         return {
-            categories: ["For You", "Discover", "Business", "Technology", "Health", "Entertainment"],
-            activeCategory: "Discover",
+            categories: ["For You", "Accounting", "Citizenship", "Forex", "General", "Immigration", "Investment", "Study Abroad", "Wealth"],
+            activeCategory: "For You",
             posts: [],
             activePost: {},
             showArticle: false,
@@ -307,6 +361,7 @@
                 // this.closing = true;
                 this.showArticle = true;
                 this.activePost.Id = id;
+                console.log(this.posts);
                 // this.overlayExpanded = false;
                 // setTimeout(() => { this.closing = false; }, 10);
                 try {
@@ -340,11 +395,58 @@
                     }
                 }
             },
+            getAuthorAndDate(author, dateStr) {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      if (isNaN(date)) return dateStr; // fallback if invalid
+
+      return author + " - " + date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+      // → "Feb 4, 2025"
+    },
+
+    isBookmarked(id) {
+   return this.bookmarkedPosts.has(id);
+},
+
+toggleBookmark(id) {
+  if (this.bookmarkedPosts.has(id)) {
+    this.bookmarkedPosts.delete(id);
+  } else {
+    this.bookmarkedPosts.add(id);
+  }
+  this.bookmarkedPosts = new Set(this.bookmarkedPosts); // trigger reactivity
+},
 
             openSearch() {
                 // e.g. this.showSearchModal = true;
                 alert("Search coming soon!"); // placeholder
-            }
+            },
+            likedPosts: new Set(),  // track which posts are liked (persistent if you use localStorage)
+
+  isLiked(id) {
+    return this.likedPosts.has(id);
+  },
+
+  toggleLike(id) {
+    if (this.likedPosts.has(id)) {
+      this.likedPosts.delete(id);
+      // Optional: call API to unlike
+    } else {
+      this.likedPosts.add(id);
+      // Optional: call API to like + increment count
+    }
+    // Force reactivity if needed
+    this.likedPosts = new Set(this.likedPosts);
+  },
+
+  openComments(id) {
+    // TODO: open comments modal/sheet
+    console.log('Open comments for post:', id);
+  }
         }
     }
 

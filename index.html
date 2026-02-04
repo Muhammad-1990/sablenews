@@ -60,16 +60,20 @@
     <!-- Snap Feed -->
     <main class="h-screen snap-y snap-mandatory pt-14" :class="{
         'overflow-y-scroll': !showArticle,
-                    'overflow-y-hidden': showArticle,
-                }">
+        'overflow-y-hidden': showArticle,
+    }">
         <template x-for="post in posts" :key="post.Id">
-            <section class="h-screen w-full relative snap-start cursor-pointer ">
+            <section class="h-screen w-full relative snap-start cursor-pointer">
                 <img :src="post.meta?.image" alt=""
                     class="relative inset-0 w-full h-full object-cover transition-all duration-5000 ease-in-out" :class="{
                     'h-96':showArticle && activePost?.Id === post.Id
                 }">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/100 to-transparent"></div>
-                <div class="absolute bottom-0 p-6 overflow-y-scroll transition-all transition-discrete duration-1500 ease-in"
+                <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto active:scale-[0.92] active:shadow-inner active:brightness-95
+                       transition-[background-color,transform,height,border-radius,box-shadow] 
+                       duration-[100ms,800ms,800ms,0ms,800ms] 
+                       ease-out ease-in-out ease-in-out ease-in-out ease-in-out
+                       delay-[0ms,400ms,400ms,0ms,400ms]"
                     @click="openPost(post.Id)" @mousedown.outside="showArticle = false" :class="{
                     'bg-white text-black rounded-t-3xl shadow-2xl translate-y-0 h-[80vh]': showArticle && activePost?.Id === post.Id,
                     'bg-transparent text-white h-auto translate-y-0': !showArticle || activePost?.Id !== post.Id
@@ -132,7 +136,7 @@
             categories: ["Discover", "For You"],
             activeCategory: "Discover",
             posts: [],
-            activePost: null,
+            activePost: {},
             showArticle: false,
             overlayExpanded: false,
             closing: false,
@@ -144,7 +148,7 @@
             },
 
             async fetchPosts(category) {
-                const res = await fetch("https://www.sableinternational.com/api/blogapp/blogposts?$orderby=LastModified desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$top=5");
+                const res = await fetch("https://www.sableinternational.com/api/blogapp/blogposts?$orderby=LastModified desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$top=20");
                 const data = await res.json();
                 this.posts = (data.value || data).map(post => ({
                     ...post,
@@ -156,6 +160,7 @@
                 // this.loading = true;
                 // this.closing = true;
                 this.showArticle = true;
+                this.activePost.Id = id;
                 // this.overlayExpanded = false;
                 // setTimeout(() => { this.closing = false; }, 10);
                 try {

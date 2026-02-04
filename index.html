@@ -309,9 +309,13 @@
                 <img :src="post.meta?.image" alt=""
                     class="relative inset-0 w-full h-1/2 object-cover transition-all duration-5000 ease-in-out" 
                     :class="{
-                        'h-0':showArticle && activePost?.Id === post.Id
-                    }">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        'h-full':showArticle && activePost?.Id === post.Id
+                    }"
+                    >
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"
+                :class="{
+                        'bg-gradient-to-b from-black/100 to-black/80 backdrop-blur-md':showArticle && activePost?.Id === post.Id
+                    }"></div>
                 <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto active:scale-[0.92] active:shadow-inner active:brightness-95
             transition-[background-color,transform,height,border-radius,box-shadow] 
             duration-[100ms,800ms,800ms,0ms,800ms] 
@@ -446,13 +450,13 @@
             },
 
             async openPost(id) {
-                // this.loading = true;
-                // this.closing = true;
+                this.loading = true;
+                this.closing = true;
                 this.showArticle = true;
                 this.activePost.Id = id;
                 console.log(this.posts);
-                // this.overlayExpanded = false;
-                // setTimeout(() => { this.closing = false; }, 10);
+                this.overlayExpanded = false;
+                setTimeout(() => { this.closing = false; }, 10);
                 try {
                     const res = await fetch(`https://www.sableinternational.com/api/blogapp/blogposts(${id})?$select=Id,Title,Summary,Content`);
                     const data = await res.json();

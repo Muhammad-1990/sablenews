@@ -46,11 +46,11 @@
 
 <body class="bg-black text-white" :class="showArticle ? 'overflow-hidden' : ''" x-data="blogApp()" x-init="init()">
     <!-- Category Tabs -->
-    <nav class="fixed top-0 left-0 right-0 z-50 text-white">
-        <div class="flex justify-center space-x-4 px-4 py-2">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black/20 text-white overflow-x-auto">
+        <div class="flex space-x-4 px-4 py-2">
             <template x-for="cat in categories" :key="cat">
-                <button @click="activeCategory = cat; fetchPosts(cat)" class="px-4 py-2"
-                    :class="activeCategory === cat ? 'border-b-2 border-white text-white font-semibold' : 'text-white'"
+                <button @click="activeCategory = cat; fetchPosts(cat)" class="px-4 py-2 rounded-full whitespace-nowrap"
+                    :class="activeCategory === cat ? 'bg-white text-black font-semibold' : 'bg-gray-800 text-gray-300'"
                     x-text="cat">
                 </button>
             </template>
@@ -58,39 +58,21 @@
     </nav>
 
     <!-- Snap Feed -->
-    <main class="h-screen snap-y snap-mandatory pt-14" :class="{
-        'overflow-y-scroll': !showArticle,
-                    'overflow-y-hidden': showArticle,
-                }">
+    <main class="h-screen overflow-y-scroll snap-y snap-mandatory pt-14">
         <template x-for="post in posts" :key="post.Id">
-            <section class="h-screen w-full relative snap-start cursor-pointer ">
-                <img :src="post.meta?.image" alt=""
-                    class="relative inset-0 w-full h-full object-cover transition-all duration-5000 ease-in-out" :class="{
-                    'h-96':showArticle && activePost?.Id === post.Id
-                }">
+            <section class="h-screen w-full relative snap-start cursor-pointer">
+                <img :src="post.meta?.image" alt="" class="relative inset-0 w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/100 to-transparent"></div>
-                <div class="absolute bottom-0 p-6 overflow-y-scroll transition-all transition-discrete duration-1500 ease-in"
-                    @click="openPost(post.Id)" @mousedown.outside="showArticle = false" :class="{
-                    'bg-white text-black rounded-t-3xl shadow-2xl translate-y-0 h-[80vh]': showArticle && activePost?.Id === post.Id,
-                    'bg-transparent text-white h-auto translate-y-0': !showArticle || activePost?.Id !== post.Id
-                }">
+                <div class="absolute bottom-0 p-6" @click="openPost(post.Id)">
                     <h2 class="text-2xl font-bold" x-text="post.Title"></h2>
                     <p class="mt-2 text-sm text-gray-200" x-text="post.Summary"></p>
-                    <div class="prose prose-lg max-w-none" x-show="showArticle && activePost?.Id === post.Id"
-                        x-html="post.Content"></div>
                 </div>
             </section>
         </template>
     </main>
 
-    <!--
-     translate-y-0 h-[80vh]
-      h-auto translate-y-0 
-     -->
-
-
     <!-- Article Overlay -->
-    <!-- <div class="fixed inset-x-0 bottom-0 bg-white text-black z-50 overflow-hidden transition-all duration-300 ease-in-out rounded-t-3xl shadow-2xl"
+    <div class="fixed inset-x-0 bottom-0 bg-white text-black z-50 overflow-hidden transition-all duration-300 ease-in-out rounded-t-3xl shadow-2xl"
         x-show="showArticle" x-ref="overlay"
         :class="closing ? 'h-0 opacity-0' : (overlayExpanded ? 'h-screen opacity-100' : 'h-[50vh] opacity-100')"
         @touchstart="startY = $event.touches[0].clientY"
@@ -107,7 +89,7 @@
                 <p class="text-gray-500">Loading...</p>
             </template>
         </div>
-    </div> -->
+    </div>
 
 </body>
 
@@ -129,8 +111,8 @@
 
     function blogApp() {
         return {
-            categories: ["Discover", "For You"],
-            activeCategory: "Discover",
+            categories: ["All", "Finance", "Travel", "Lifestyle"],
+            activeCategory: "All",
             posts: [],
             activePost: null,
             showArticle: false,
@@ -153,11 +135,11 @@
             },
 
             async openPost(id) {
-                // this.loading = true;
-                // this.closing = true;
+                this.loading = true;
+                this.closing = true;
                 this.showArticle = true;
-                // this.overlayExpanded = false;
-                // setTimeout(() => { this.closing = false; }, 10);
+                this.overlayExpanded = false;
+                setTimeout(() => { this.closing = false; }, 10);
                 try {
                     const res = await fetch(`https://www.sableinternational.com/api/blogapp/blogposts(${id})?$select=Id,Title,Summary,Content`);
                     const data = await res.json();

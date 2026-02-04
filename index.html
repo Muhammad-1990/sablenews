@@ -255,10 +255,10 @@
     <nav
     x-show="!showArticle"
         class=".fade-horizontal fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm text-white">
-        <div class="relative flex items-center justify-between px-4 py-2">
+        <div class="relative flex items-center justify-between px-2 py-1">
             <!-- Scrollable categories area -->
-            <div class="flex-1 overflow-x-auto scrollbar-hide whitespace-nowrap -mx-4 px-4 ">
-                <div class="flex justify-center space-x-4 min-w-max">
+            <div class="flex-1 overflow-x-auto scrollbar-hide whitespace-nowrap ">
+                <div class="flex justify-center space-x-2 min-w-max">
                     <template x-for="cat in categories" :key="cat">
                         <button @click="activeCategory = cat; fetchPosts(cat)"
                             class="relative px-4 py-2 text-white text-xs font-medium transition-colors" >
@@ -314,7 +314,7 @@
             @click="openPost(post.Id)" @mousedown.outside="showArticle = false"
                     :class="{
             'translate-y-0 h-full bg-black': showArticle && activePost?.Id === post.Id,
-            'h-80 translate-y-0 bg-transparent': !showArticle || activePost?.Id !== post.Id
+            'h-50 translate-y-0 bg-transparent': !showArticle || activePost?.Id !== post.Id
             }"
         @touchstart="startY = $event.touches[0].clientY; "
         @touchmove="

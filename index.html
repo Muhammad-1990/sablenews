@@ -292,7 +292,7 @@
     <!-- Snap Feed -->
     <main class="h-screen snap-y snap-mandatory pt-14" :class="
    {
-   'overflow-y-scroll': !showArticle,
+   'overflow-y-scroll': !showArticle && !dragging,
    'overflow-y-hidden': showArticle,
    }">
         <template x-for="post in posts" :key="post.Id">
@@ -301,13 +301,12 @@
             'z-60': showArticle && activePost?.Id === post.Id,
             }"
             :class="closing ? 'h-0 opacity-0' : (overlayExpanded ? 'h-screen opacity-100' : 'h-[50vh] opacity-100')"
-        @touchstart="startY = $event.touches[0].clientY"
-        @touchend="endY = $event.changedTouches[0].clientY; handleSwipe()">
+            >
                 <img :src="post.meta?.image" alt=""
                     class="relative inset-0 w-full h-1/2 object-cover"
                     >
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto active:scale-[0.92] active:shadow-inner active:brightness-95
+                <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto
             transition-[transform,height, background-color] 
             duration-[300ms,300ms,300ms] 
             ease-out ease-in-out ease-in-out 
@@ -316,7 +315,25 @@
                     :class="{
             'translate-y-0 h-full bg-black': showArticle && activePost?.Id === post.Id,
             'h-1/2 translate-y-0 bg-transparent': !showArticle || activePost?.Id !== post.Id
-            }">
+            }"
+        @touchstart="startY = $event.touches[0].clientY; "
+        @touchmove="
+     
+            console.log('startY:', startY);
+            if (startY < 100) {
+                currentY = $event.touches[0].clientY;
+                let delta = currentY - startY;
+                $el.style.transform = `translateY(${delta}px)`;
+                if (delta > 50) {
+                    showArticle = false;
+                    dragging = false;
+                    $el.style.transform = `translateY(0px)`;
+                }
+                
+            }
+        "
+
+        @touchend=" dragging = false;">
                     <div class="flex justify-between space-x-4 items-center">
                         <p class="text-xs" x-text="getAuthorAndDate(post.meta.author,post.LastModified)"></p>
                         <!-- Bookmark button – inline style -->
@@ -427,7 +444,9 @@
             closing: false,
             loading: false,
             startY: 0,
+            currentY: 0,
             endY: 0,
+            dragging: false ,
             async init() {
                 await this.fetchPosts(this.activeCategory);
             },
@@ -466,18 +485,13 @@
                     // swipe up expands overlay
                     this.overlayExpanded = true;
                 } else if (delta < -50) {
-                    // swipe down
-                    if (this.overlayExpanded) {
-                        // collapse back to half
-                        this.overlayExpanded = false;
-                    } else {
                         // dismiss overlay entirely
                         this.closing = true;
                         setTimeout(() => {
                             this.showArticle = false;
                             this.closing = false;
                         }, 300);
-                    }
+                   
                 }
             },
             getAuthorAndDate(author, dateStr) {

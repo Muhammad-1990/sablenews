@@ -114,6 +114,50 @@
             mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
             -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
         }
+
+        .content p {
+                margin-bottom: 1rem;
+        }
+        .content a {
+            text-decoration-line: none;
+                color: rgb(170 122 26);
+        }
+        .content h2 {
+            line-height: 1.8rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            margin-top: 3rem;
+        }
+
+        .content ul {
+            list-style-type: disc;
+            padding-left: 2rem;
+        }
+
+        .content ul li {
+            margin-bottom: .5rem;
+            margin-top: .5rem;
+        }
+
+        .content  ol {
+            margin-bottom: 2.25rem;
+            margin-left: 2.25rem;
+            margin-top: 0;
+        }
+
+        .content ol li {
+            list-style-type: decimal;
+            margin-bottom: 1rem;
+        }
+
+        .content hr{
+            display:none;
+        }
+
+        .content h4:last-child{
+            display:none;
+        }
     </style>
 
     <link rel="apple-touch-startup-image"
@@ -308,7 +352,7 @@
                 <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto transition-all duration-300"
                 @click="openPost(post.Id)"
                 :class="{
-                    'h-full bg-black/90 backdrop-blur-sm': showArticle && activePost?.Id === post.Id,
+                    'h-full bg-black/80 backdrop-blur-sm': showArticle && activePost?.Id === post.Id,
                     'h-80 bg-transparent': !showArticle || activePost?.Id !== post.Id
                 }"
                 
@@ -376,7 +420,7 @@
                 <!-- Summary row -->
                 <p class="mt-2 text-sm text-gray-200" x-text="post.Summary" x-show="!showArticle"></p>
                 <!-- Content row -->
-                <div class="prose prose-lg max-w-none text-sm" x-show="showArticle && activePost?.Id === post.Id"
+                <div class="prose prose-lg max-w-none text-sm content" x-show="showArticle && activePost?.Id === post.Id"
                     x-html="post.Content"></div>
                 </div>
             </div>

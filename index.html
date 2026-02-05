@@ -290,49 +290,43 @@
     </nav>
 
     <!-- Snap Feed -->
-    <main class="h-screen snap-y snap-mandatory pt-14" :class="
-   {
-   'overflow-y-scroll': !showArticle && !dragging,
-   'overflow-y-hidden': showArticle,
-   }">
+    <main class="h-screen snap-y snap-mandatory pt-14" 
+        :class="
+        {
+            'overflow-y-scroll': !showArticle && !dragging,
+            'overflow-y-hidden': showArticle
+        }">
         <template x-for="post in posts" :key="post.Id">
             <section class="h-screen w-full relative snap-start cursor-pointer"
-            :class="{
-            'z-60': showArticle && activePost?.Id === post.Id,
-            }"
-            :class="closing ? 'h-0 opacity-0' : (overlayExpanded ? 'h-screen opacity-100' : 'h-[50vh] opacity-100')"
-            >
+                    :class="{
+                        'z-60': showArticle && activePost?.Id === post.Id,
+                    }"
+                    :class="closing ? 'h-0 opacity-0' : (overlayExpanded ? 'h-screen opacity-100' : 'h-[50vh] opacity-100')">
                 <img :src="post.meta?.image" alt=""
-                    class="relative inset-0 w-full h-full object-cover"
-                    >
+                    class="relative inset-0 w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto
-         transition-all duration-300"
-  @click="openPost(post.Id)"
-  :class="{
-    'h-full bg-black': showArticle && activePost?.Id === post.Id,
-    'h-80 bg-transparent': !showArticle || activePost?.Id !== post.Id
-  }"
-
-        @touchstart="startY = $event.touches[0].clientY; "
-        @touchmove="
-     
-            console.log('startY:', startY);
-            if (startY < 100) {
-                currentY = $event.touches[0].clientY;
-                let delta = currentY - startY;
-                $el.style.transform = `translateY(${delta}px)`;
-                if (delta > 50) {
-                    showArticle = false;
-                    dragging = false;
-                    $el.style.transform = `translateY(0px)`;
-                }
+                <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto transition-all duration-300"
+                @click="openPost(post.Id)"
+                :class="{
+                    'h-full bg-black/90 backdrop-blur-sm': showArticle && activePost?.Id === post.Id,
+                    'h-80 bg-transparent': !showArticle || activePost?.Id !== post.Id
+                }"
                 
-            }
-        "
-
-        @touchend=" dragging = false;">
-                    <div class="flex justify-between space-x-4 items-center">
+                @touchstart="startY = $event.touches[0].clientY; "
+                @touchmove="
+                if (startY < 100) {
+                    currentY = $event.touches[0].clientY;
+                    let delta = currentY - startY;
+                    $el.style.transform = `translateY(${delta}px)`;
+                    if (delta > 50) {
+                        showArticle = false;
+                        dragging = false;
+                        $el.style.transform = `translateY(0px)`;
+                    }
+                }"
+                @touchend="dragging = false;">
+                <!-- Author and date row -->
+                <div class="flex justify-between space-x-4 items-center">
                         <p class="text-xs" x-text="getAuthorAndDate(post.meta.author,post.LastModified)"></p>
                         <!-- Bookmark button – inline style -->
                         <button @click.stop="toggleBookmark(post.Id)"
@@ -346,11 +340,11 @@
                             </svg>
                             <span class="text-xs mt-1 font-medium" x-text="post.meta?.bookmarks"></span>
                         </button>
-                    </div>
-
-                    <h2 class="text-xl font-bold" x-text="post.Title"></h2>
-                    <!-- Metadata row – between title and summary -->
-                    <div class="flex items-center space-x-6 text-xs my-4 opacity-90">
+                </div>
+                <!-- Title row -->
+                <h2 class="text-xl font-bold" x-text="post.Title"></h2>
+                <!-- Metadata row – between title and summary -->
+                <div class="flex items-center space-x-6 text-xs my-4 opacity-90">
                         <!-- Likes -->
                         <button @click.stop="toggleLike(post.Id)"
                             class="flex items-center space-x-1.5 transition-all duration-200 hover:scale-105 active:scale-95"
@@ -378,11 +372,14 @@
                             </svg>
                             <span x-text="post.meta?.views || '45k'"></span>
                         </div>
-                    </div>
-                    <p class="mt-2 text-sm text-gray-200" x-text="post.Summary" x-show="!showArticle"></p>
-                    <div class="prose prose-lg max-w-none text-sm" x-show="showArticle && activePost?.Id === post.Id"
-                        x-html="post.Content"></div>
                 </div>
+                <!-- Summary row -->
+                <p class="mt-2 text-sm text-gray-200" x-text="post.Summary" x-show="!showArticle"></p>
+                <!-- Content row -->
+                <div class="prose prose-lg max-w-none text-sm" x-show="showArticle && activePost?.Id === post.Id"
+                    x-html="post.Content"></div>
+                </div>
+            </div>
             </section>
         </template>
     </main>

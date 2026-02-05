@@ -1,15 +1,13 @@
 {
-  "name": "My PWA Blog",
+  "name": "Sablle News",
   "title": "Sablle News",
   "short_name": "Blog",
   "description": "sablenews - Your source for the latest updates and articles from Sable International.",
-  "start_url": "index.html",
-  "scope": "/",
   "display": "standalone",
   "lang": "en-US",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "background_color": "#01000e",
+  "theme_color": "#01000e",
   "icons": [
       {
         "src": "favicon.ico",

@@ -10,7 +10,7 @@
     <meta name="author" content="github.com/Muhammad-1990/sablenews">
     <title>Sable News</title>
     <meta name="description" content="Sable News">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Sable News">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="msapplication-TileColor" content="#1d90f5">
@@ -341,7 +341,7 @@
             'overflow-y-hidden overflow-hidden': showArticle
         }">
         <template x-for="post in posts" :key="post.Id">
-            <section class="h-screen w-full relative snap-start cursor-pointer overflow-hidden"
+            <section class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden"
                     :class="{
                         'z-60': showArticle && activePost?.Id === post.Id,
                     }"
@@ -487,6 +487,7 @@
             categories: ["For You", "Accounting", "Citizenship", "Forex", "General", "Immigration", "Investment", "Study Abroad", "Wealth"],
             activeCategory: "For You",
             posts: [],
+            bookmarkedPosts:  new Set(),
             activePost: {},
             showArticle: false,
             overlayExpanded: false,
@@ -514,7 +515,6 @@
                 this.closing = true;
                 this.showArticle = true;
                 this.activePost.Id = id;
-                console.log(this.posts);
                 this.overlayExpanded = false;
                 setTimeout(() => { this.closing = false; }, 10);
                 try {

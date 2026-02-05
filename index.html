@@ -341,16 +341,16 @@
             'overflow-y-hidden': showArticle
         }">
         <template x-for="post in posts" :key="post.Id">
-            <section class="h-screen w-full relative snap-start cursor-pointer"
+            <section class="h-screen w-full relative snap-start cursor-pointer overflow-hidden"
                     :class="{
                         'z-60': showArticle && activePost?.Id === post.Id,
                     }"
-                    :class="closing ? 'h-0 opacity-0' : (overlayExpanded ? 'h-screen opacity-100' : 'h-[50vh] opacity-100')">
+                   >
                 <!-- <img :src="post.meta?.image" alt="" class="relative inset-0 w-full h-full object-cover"> -->
 
                 <div class="relative w-full h-screen">
                     <!-- Blurred background fill -->
-                    <img :src="post.meta?.image" class="absolute inset-0 w-full h-full object-cover blur-md scale-110" />
+                    <img :src="post.meta?.image" class="absolute inset-0 w-full h-full object-cover blur-md scale-100" />
 
                     <!-- Actual image centered -->
                     <img :src="post.meta?.image" class="relative mx-auto max-w-full h-[50vh] object-cover shadow-lg" />

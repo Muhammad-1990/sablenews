@@ -310,7 +310,7 @@
 
                             <!-- Small underline indicator (you had w-6 h-0.5 – kept it) -->
                             <span
-                                class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-white transition-all duration-300 origin-center"
+                                class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-white transform-gpu transition-all duration-300 origin-center"
                                 :class="{
                                 'opacity-100 scale-x-100': activeCategory === cat,
                                 'opacity-0 scale-x-0': activeCategory !== cat
@@ -322,7 +322,7 @@
 
             <!-- Search icon on the right -->
             <button @click="openSearch()"
-                class="ml-3 p-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
+                class="ml-3 p-2 rounded-full hover:bg-white/10 transform-gpu transition-colors flex items-center justify-center"
                 aria-label="Search">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
@@ -359,7 +359,7 @@
 
 
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto transition-all duration-300"
+                <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto transform-gpu transition-all duration-300"
                 @click="openPost(post.Id)"
                 :class="{
                     'h-full bg-black/80 backdrop-blur-sm': showArticle && activePost?.Id === post.Id,
@@ -501,7 +501,7 @@
             },
 
             async fetchPosts(category) {
-                const res = await fetch("https://www.sableinternational.com/api/blogapp/blogposts?$orderby=LastModified desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$top=20");
+                const res = await fetch("https://www.sableinternational.com/api/blogapp/blogposts?$orderby=PublicationDate desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$top=20");
                 const data = await res.json();
                 this.posts = (data.value || data).map(post => ({
                     ...post,

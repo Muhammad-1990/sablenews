@@ -298,7 +298,7 @@
     <!-- Category Tabs -->
     <nav x-show="!showArticle"
         class="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm text-white">
-        <div class="relative flex items-center justify-between px-4 py-1">
+        <div class="relative flex items-center justify-between px-4 py-2">
             <!-- Scrollable categories area -->
             <div class="flex-1 overflow-x-auto scrollbar-hide whitespace-nowrap ">
                 <div class="flex justify-start space-x-6 min-w-max">
@@ -366,27 +366,29 @@
 
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto transform-gpu transition-all duration-300"
-                @click="openPost(post.Id)"
-                :class="{
-                    'h-full bg-black/80 backdrop-blur-sm': showArticle && activePost?.Id === post.Id,
-                    'h-80 bg-transparent': !showArticle || activePost?.Id !== post.Id
-                }"
-                
-                @touchstart="startY = $event.touches[0].clientY; "
-                @touchmove="
-                if (startY < 100) {
-                    currentY = $event.touches[0].clientY;
-                    let delta = currentY - startY;
-                    $el.style.transform = `translateY(${delta}px)`;
-                    if (delta > 50) {
-                        showArticle = false;
-                        dragging = false;
-                        $el.style.transform = `translateY(0px)`;
-                    }
-                }"
-                @touchend="dragging = false;">
-                <!-- Author and date row -->
-                <div class="flex justify-between  items-center">
+                    @click="openPost(post.Id)"
+                    :class="{
+                        'h-full bg-black/80 backdrop-blur-sm': showArticle && activePost?.Id === post.Id,
+                        'h-80 bg-transparent overflow-y-hidden overflow-hidden': !showArticle || activePost?.Id !== post.Id,
+                        'overflow-hidden': dragging || showArticle
+                    }"
+
+                    @touchstart="startY = $event.touches[0].clientY; "
+                    @touchmove="
+                    if (startY < 100) {
+                        dragging = true;
+                        currentY = $event.touches[0].clientY;
+                        let delta = currentY - startY;
+                        $el.style.transform = `translateY(${delta}px)`;
+                        if (delta > 50) {
+                            showArticle = false;
+                            dragging = false;
+                            $el.style.transform = `translateY(0px)`;
+                        }
+                    }"
+                    @touchend="dragging = false;">
+                    <!-- Author and date row -->
+                    <div class="flex justify-between  items-center">
                         <p class="text-xs" x-text="getAuthorAndDate(post.meta.author,post.LastModified)"></p>
                         <div class="flex justify-end  items-center">
                         <!-- Share button – same styling as your bookmark -->
@@ -411,15 +413,15 @@
                             </svg>
                         </button>
                     </div>
-                </div>
-                <!-- Title row -->
-                <h2 class="text-xl font-bold" x-text="post.Title"></h2>
-                <!-- Summary row -->
-                <p class="mt-2 text-sm text-gray-200 transition-opacity duration-300" x-text="post.Summary" x-show="!showArticle"></p>
-                <!-- Content row -->
-                <div class="prose prose-lg max-w-none text-sm mt-4 content" x-show="showArticle && activePost?.Id === post.Id" x-transition x-html="post.Content"></div>
-                <!-- Metadata row – between title and summary -->
-                <div class="flex items-center space-x-6 text-xs my-4 opacity-90">
+                    </div>
+                    <!-- Title row -->
+                    <h2 class="text-xl font-bold" x-text="post.Title"></h2>
+                    <!-- Summary row -->
+                    <p class="mt-2 text-sm text-gray-200 transition-opacity duration-300" x-text="post.Summary" x-show="!showArticle"></p>
+                    <!-- Content row -->
+                    <div class="prose prose-lg max-w-none text-sm mt-4 content" x-show="showArticle && activePost?.Id === post.Id" x-transition x-html="post.Content"></div>
+                    <!-- Metadata row – between title and summary -->
+                    <div class="flex items-center space-x-6 text-xs my-4 opacity-90">
                         <!-- Likes -->
                         <button @click.stop="toggleLike(post.Id)"
                             class="flex items-center space-x-1.5 transition-all duration-200 hover:scale-105 active:scale-95"
@@ -447,7 +449,8 @@
                             </svg>
                             <span x-text="post.meta?.views || '45k'"></span>
                         </div>
-                </div>    
+                    </div>
+                    
             </div>
             </div>
             </section>
@@ -474,8 +477,8 @@
 
     function blogApp() {
         return {
-            categories: ["For you", "Featured", "Bookmarks"],
-            activeCategory: "For you",
+            categories: ["Featured",  "Bookmarks"],
+            activeCategory: "Featured",
             posts: [],
             bookmarkedPosts:  new Set(),
             likedPosts: new Set(),
@@ -564,6 +567,7 @@
                    
                 }
             },
+
             getAuthorAndDate(author, dateStr) {
                 if (!dateStr) return '';
                 const date = new Date(dateStr);

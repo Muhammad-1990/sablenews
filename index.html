@@ -309,7 +309,7 @@
 
                             <!-- Small underline indicator (you had w-6 h-0.5 – kept it) -->
                             <span
-                                class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-white transform-gpu transition-all duration-300 origin-center"
+                                class="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-0.5 rounded-full bg-white transform-gpu transition-all duration-300 origin-center"
                                 :class="{
                                 'opacity-100 scale-x-100': activeCategory === cat,
                                 'opacity-0 scale-x-0': activeCategory !== cat
@@ -351,7 +351,7 @@
             'overflow-y-hidden overflow-hidden': showArticle
         }">
         <template x-for="post in posts" :key="post.Id">
-            <section class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden"
+            <section :data-post-id="post.Id" class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden"
                     :class="{
                         'z-60': showArticle && activePost?.Id === post.Id,
                     }">
@@ -490,6 +490,22 @@
             dragging: false ,
             async init() {
                 await this.fetchPosts(this.activeCategory);
+                this.handleDeepLink();
+            },
+
+            handleDeepLink() {
+                const params = new URLSearchParams(window.location.search);
+
+                let postId = params.get('id');
+
+                if (postId && this.posts.some(p => p.Id === postId)) {
+                  // Open that post automatically
+                  this.openPost(postId);
+                  // Optional: smooth scroll to it
+                  setTimeout(() => {
+                    document.querySelector(`[data-post-id="${postId}"]`)?.scrollIntoView({ behavior: 'smooth' });
+                  }, 300);
+                }
             },
 
             async fetchPosts(category) {
@@ -516,6 +532,20 @@
                     console.error("Failed to load post", err);
                 } finally {
                     this.loading = false;
+                }
+            },
+
+            async sharePost(Id, Title, Summary){
+                console.log('shareclick')
+                const shareData = {
+                        title: Title,
+                        text: Summary,
+                        url: `http://localhost:3000/?id=${Id}`
+                };
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    if (err.name !== 'AbortError') { }
                 }
             },
 
@@ -587,6 +617,9 @@
             }
         }
     }
+
+
+    
 
     window.onload = async () => {
         if ('serviceWorker' in navigator) {

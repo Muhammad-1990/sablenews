@@ -338,7 +338,7 @@
         :class="
         {
             'overflow-y-scroll': !showArticle && !dragging,
-            'overflow-y-hidden': showArticle
+            'overflow-y-hidden overflow-hidden': showArticle
         }">
         <template x-for="post in posts" :key="post.Id">
             <section class="h-screen w-full relative snap-start cursor-pointer overflow-hidden"
@@ -350,10 +350,10 @@
 
                 <div class="relative w-full h-screen">
                     <!-- Blurred background fill -->
-                    <img :src="post.meta?.image" class="absolute inset-0 w-full h-full object-cover blur-md scale-100" />
+                    <img :src="post.meta?.image" class="absolute h-full object-cover blur-md" />
 
                     <!-- Actual image centered -->
-                    <img :src="post.meta?.image" class="relative mx-auto max-w-full h-[50vh] object-cover shadow-lg" />
+                    <img :src="post.meta?.image" class="relative h-[50vh] object-cover shadow-lg" />
                 </div>
 
 

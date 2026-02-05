@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="theme-color" content="#1d90f5" />
+    <meta name="theme-color" content="#01000e" />
     <meta name="Description" content="Sable News">
     <meta name="author" content="github.com/Muhammad-1990/sablenews">
     <title>Sable News</title>
@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Sable News">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="msapplication-TileColor" content="#1d90f5">
+    <meta name="msapplication-TileColor" content="#01000e">
 
     <meta property="og:title" content="Sable News" />
     <meta property="og:description " content="Sable News" />
@@ -296,8 +296,7 @@
 
 <body class="bg-black text-white" :class="showArticle ? 'overflow-hidden' : ''" x-data="blogApp()" x-init="init()">
     <!-- Category Tabs -->
-    <nav
-    x-show="!showArticle"
+    <nav x-show="!showArticle"
         class=".fade-horizontal fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm text-white">
         <div class="relative flex items-center justify-between px-2 py-1">
             <!-- Scrollable categories area -->
@@ -344,9 +343,7 @@
             <section class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden"
                     :class="{
                         'z-60': showArticle && activePost?.Id === post.Id,
-                    }"
-                   >
-                <!-- <img :src="post.meta?.image" alt="" class="relative inset-0 w-full h-full object-cover"> -->
+                    }">
 
                 <div class="relative w-full h-screen">
                     <!-- Blurred background fill -->
@@ -355,8 +352,6 @@
                     <!-- Actual image centered -->
                     <img :src="post.meta?.image" class="relative h-[50vh] object-cover shadow-lg" />
                 </div>
-
-
 
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto transform-gpu transition-all duration-300"
@@ -397,7 +392,12 @@
                 </div>
                 <!-- Title row -->
                 <h2 class="text-xl font-bold" x-text="post.Title"></h2>
-                <!-- Metadata row – between title and summary -->
+                
+                <!-- Summary row -->
+                <p class="mt-2 text-sm text-gray-200 transition-opacity duration-300" x-text="post.Summary" x-show="!showArticle"></p>
+                <!-- Content row -->
+                <div class="prose prose-lg max-w-none text-sm mt-4 content" x-show="showArticle && activePost?.Id === post.Id" x-transition x-html="post.Content"></div>
+            <!-- Metadata row – between title and summary -->
                 <div class="flex items-center space-x-6 text-xs my-4 opacity-90">
                         <!-- Likes -->
                         <button @click.stop="toggleLike(post.Id)"
@@ -426,43 +426,12 @@
                             </svg>
                             <span x-text="post.meta?.views || '45k'"></span>
                         </div>
-                </div>
-                <!-- Summary row -->
-                <p class="mt-2 text-sm text-gray-200" x-text="post.Summary" x-show="!showArticle"></p>
-                <!-- Content row -->
-                <div class="prose prose-lg max-w-none text-sm content" x-show="showArticle && activePost?.Id === post.Id"
-                    x-html="post.Content"></div>
-                </div>
+                </div>    
+            </div>
             </div>
             </section>
         </template>
     </main>
-
-    <!--
-     translate-y-0 h-[80vh]
-      h-auto translate-y-0 
-     -->
-
-
-    <!-- Article Overlay -->
-    <!-- <div class="fixed inset-x-0 bottom-0 bg-white text-black z-50 overflow-hidden transition-all duration-300 ease-in-out rounded-t-3xl shadow-2xl"
-        x-show="showArticle" x-ref="overlay"
-        :class="closing ? 'h-0 opacity-0' : (overlayExpanded ? 'h-screen opacity-100' : 'h-[50vh] opacity-100')"
-        @touchstart="startY = $event.touches[0].clientY"
-        @touchend="endY = $event.changedTouches[0].clientY; handleSwipe()">
-        <div class="overflow-y-auto p-6 h-full">
-            <template x-if="activePost">
-                <div>
-                    <h2 class="text-2xl font-bold" x-text="activePost.Title"></h2>
-                    <p class="mt-2 mb-4 text-gray-600" x-text="activePost.Summary"></p>
-                    <div class="prose prose-lg max-w-none" x-html="activePost.Content"></div>
-                </div>
-            </template>
-            <template x-if="loading">
-                <p class="text-gray-500">Loading...</p>
-            </template>
-        </div>
-    </div> -->
 
 </body>
 
@@ -488,6 +457,7 @@
             activeCategory: "For You",
             posts: [],
             bookmarkedPosts:  new Set(),
+            likedPosts: new Set(),
             activePost: {},
             showArticle: false,
             overlayExpanded: false,
@@ -573,8 +543,7 @@
                 // e.g. this.showSearchModal = true;
                 alert("Search coming soon!"); // placeholder
             },
-            likedPosts: new Set(),  // track which posts are liked (persistent if you use localStorage)
-
+            
             isLiked(id) {
                 return this.likedPosts.has(id);
             },

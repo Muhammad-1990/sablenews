@@ -357,7 +357,7 @@
         <template x-for="post in posts" :key="post.Id">
             <section :data-post-id="post.Id"
                 class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden" :class="{
-                        'z-60': showArticle && activePost? === post.Id,
+                        'z-60': showArticle && activePost === post.Id,
                     }">
 
                 <div class="relative w-full h-screen">
@@ -462,13 +462,15 @@
                     </div>
 
                     <div x-show="loading && activePost === post.Id" class="animate-pulse space-y-4 py-4">
+                        <div class="h-6 bg-gray-300 rounded w-3/4"></div>
+                        <div class="h-12 bg-gray-300 rounded w-full"></div>
+                        <div class="h-9 bg-gray-300 rounded w-5/6"></div>
                         <div class="h-4 bg-gray-300 rounded w-3/4"></div>
                         <div class="h-3 bg-gray-300 rounded w-full"></div>
-                        <div class="h-3 bg-gray-300 rounded w-5/6"></div>
-                        <div class="h-4 bg-gray-300 rounded w-3/4"></div>
-                        <div class="h-3 bg-gray-300 rounded w-full"></div>
-                        <div class="h-3 bg-gray-300 rounded w-5/6"></div>
-                        
+                        <div class="h-8 bg-gray-300 rounded w-5/6"></div>
+                        <div class="h-6 bg-gray-300 rounded w-3/4"></div>
+                        <div class="h-12 bg-gray-300 rounded w-full"></div>
+                        <div class="h-9 bg-gray-300 rounded w-5/6"></div>
                         <div class="h-3 bg-gray-300 rounded w-5/6"></div>
                         <div class="h-4 bg-gray-300 rounded w-3/4"></div>
 
@@ -478,11 +480,13 @@
                 </div>
             </section>
         </template>
+        <div x-ref="loadTrigger"></div>
     </main>
 
 </body>
 
 <script>
+
     function parseMetaTags(metaString) {
         const meta = {};
         metaString
@@ -504,6 +508,11 @@
             activeCategory: "Featured",
             posts: [],
             activePost: null,
+            skip: 0,
+            top: 10, // how many to fetch per request
+            postsLoading: false,
+            hasMore: true,
+
             bookmarkedPosts: new Set(),
             likedPosts: new Set(),
             showArticle: false,
@@ -515,8 +524,20 @@
             endY: 0,
             dragging: false,
             async init() {
-                await this.fetchPosts(this.activeCategory);
-                this.handleDeepLink();
+                this.$nextTick(async () => {
+                    const trigger = this.$refs.loadTrigger;
+                    if (!trigger) return;
+
+                    const observer = new IntersectionObserver(entries => {
+                      entries.forEach(async entry => {
+                        if (entry.isIntersecting) await this.fetchPosts(this.activeCategory);
+                      });
+                    });
+                
+                    observer.observe(trigger);
+                    await this.fetchPosts(this.activeCategory); // initial load
+                    this.handleDeepLink();
+                });
             },
 
             handleDeepLink() {
@@ -535,13 +556,23 @@
             },
 
             async fetchPosts(category) {
-                const res = await fetch("https://www.sableinternational.com/api/blogapp/blogposts?$select=Id,Title,Summary,BlogPostMetaTags&$orderby=PublicationDate desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$top=20");
-                const data = await res.json();
-                this.posts = (data.value || data).map(post => ({
-                    ...post,
-                    meta: parseMetaTags(post.BlogPostMetaTags)
-                }));
-            },
+      if (this.postsLoading || !this.hasMore) return;
+      this.postsLoading = true;
+
+      const res = await fetch(
+        `https://www.sableinternational.com/api/blogapp/blogposts?$select=Id,Title,Summary,BlogPostMetaTags&$orderby=PublicationDate desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$skip=${this.skip}&$top=${this.top}`
+      );
+      const data = await res.json();
+      const newPosts = (data.value || data).map(post => ({
+        ...post,
+        meta: parseMetaTags(post.BlogPostMetaTags)
+      }));
+
+      this.posts = [...this.posts, ...newPosts];
+      this.skip += this.top;
+      if (newPosts.length < this.top) this.hasMore = false; // no more posts
+      this.postsLoading = false;
+    },
 
             async openPost(id) {
                 this.showArticle = true;

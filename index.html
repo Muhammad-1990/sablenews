@@ -29,7 +29,7 @@
     <link rel="icon" href="https://muhammad-1990.github.io/sablenews/favicon.ico" type="image/x-icon" />
     <link rel="manifest" href="https://muhammad-1990.github.io/sablenews/manifest.json" />
     <link rel="apple-touch-icon" href="https://muhammad-1990.github.io/sablenews/manifest-icon-512.png" />
- 
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs" defer></script>
     <style>
@@ -116,12 +116,14 @@
         }
 
         .content p {
-                margin-bottom: 1rem;
+            margin-bottom: 1rem;
         }
+
         .content a {
             text-decoration-line: none;
-                color: rgb(170 122 26);
+            color: rgb(170 122 26);
         }
+
         .content h2 {
             line-height: 1.8rem;
             font-size: 1.5rem;
@@ -140,7 +142,7 @@
             margin-top: .5rem;
         }
 
-        .content  ol {
+        .content ol {
             margin-bottom: 2.25rem;
             margin-left: 2.25rem;
             margin-top: 0;
@@ -151,12 +153,16 @@
             margin-bottom: 1rem;
         }
 
-        .content hr{
-            display:none;
+        .content hr {
+            display: none;
         }
 
-        .content h4:last-child{
-            display:none;
+        .content h4:last-child {
+            display: none;
+        }
+
+        [x-cloak] {
+            display: none !important;
         }
     </style>
 
@@ -296,15 +302,14 @@
 
 <body class="bg-black text-white" :class="showArticle ? 'overflow-hidden' : ''" x-data="blogApp()" x-init="init()">
     <!-- Category Tabs -->
-    <nav x-show="!showArticle"
-        class="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm text-white">
+    <nav x-show="!showArticle" class="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm text-white">
         <div class="relative flex items-center justify-between px-4 py-2">
             <!-- Scrollable categories area -->
             <div class="flex-1 overflow-x-auto scrollbar-hide whitespace-nowrap ">
                 <div class="flex justify-start space-x-6 min-w-max">
                     <template x-for="cat in categories" :key="cat">
                         <button @click="activeCategory = cat; fetchPosts(cat)"
-                            class="relative py-2 text-white text-xs font-light transition-colors" >
+                            class="relative py-2 text-white text-xs font-light transition-colors">
                             <span x-text="cat"></span>
 
                             <!-- Small underline indicator (you had w-6 h-0.5 – kept it) -->
@@ -320,8 +325,8 @@
             </div>
 
             <div class="relative flex items-center justify-end px-2 py-1">
-                  <!-- Save icon on the right -->
-            <!-- <button @click="openSearch()"
+                <!-- Save icon on the right -->
+                <!-- <button @click="openSearch()"
                 class="ml-3 p-2 rounded-full bg-white/10 transform-gpu transition-colors flex items-center justify-center"
                 aria-label="Search">
                 <svg class="w-5 h-5 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -330,7 +335,7 @@
                 </svg>
             </button> -->
                 <!-- Search icon on the right -->
-            <!-- <button @click="openSearch()"
+                <!-- <button @click="openSearch()"
                 class="ml-3 p-2 rounded-full bg-white/10 transform-gpu transition-colors flex items-center justify-center"
                 aria-label="Search">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -344,16 +349,15 @@
     </nav>
 
     <!-- Snap Feed -->
-    <main class="h-screen snap-y snap-mandatory pt-14" 
-        :class="
+    <main class="h-screen snap-y snap-mandatory pt-14" :class="
         {
             'overflow-y-scroll': !showArticle && !dragging,
             'overflow-y-hidden overflow-hidden': showArticle
         }">
         <template x-for="post in posts" :key="post.Id">
-            <section :data-post-id="post.Id" class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden"
-                    :class="{
-                        'z-60': showArticle && activePost?.Id === post.Id,
+            <section :data-post-id="post.Id"
+                class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden" :class="{
+                        'z-60': showArticle && activePost? === post.Id,
                     }">
 
                 <div class="relative w-full h-screen">
@@ -366,15 +370,11 @@
 
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto transform-gpu transition-all duration-300"
-                    @click="openPost(post.Id)"
-                    :class="{
-                        'h-full bg-black/80 backdrop-blur-sm': showArticle && activePost?.Id === post.Id,
-                        'h-80 bg-transparent overflow-y-hidden overflow-hidden': !showArticle || activePost?.Id !== post.Id,
+                    @click="!showArticle ? openPost(post.Id) : null" :class="{
+                        'h-full bg-black/80 backdrop-blur-sm': showArticle && activePost === post.Id,
+                        'h-80 bg-transparent overflow-y-hidden overflow-hidden': !showArticle || activePost !== post.Id,
                         'overflow-hidden': dragging || showArticle
-                    }"
-
-                    @touchstart="startY = $event.touches[0].clientY; "
-                    @touchmove="
+                    }" @touchstart="startY = $event.touches[0].clientY; " @touchmove="
                     if (startY < 100) {
                         dragging = true;
                         currentY = $event.touches[0].clientY;
@@ -385,43 +385,53 @@
                             dragging = false;
                             $el.style.transform = `translateY(0px)`;
                         }
-                    }"
-                    @touchend="dragging = false;">
+                    }" @touchend="dragging = false;">
                     <!-- Author and date row -->
-                    <div class="flex justify-between  items-center">
+                     <div class="flex justify-between  items-center">
                         <p class="text-xs" x-text="getAuthorAndDate(post.meta.author,post.LastModified)"></p>
                         <div class="flex justify-end  items-center">
-                        <!-- Share button – same styling as your bookmark -->
-                        <button 
-                          @click.stop="sharePost(post.Id, post.Title, post.Summary)"
-                          class=" p-2 items-center transition-transform duration-200  active:scale-90"
-                          aria-label="Share this post">
-                          <svg class="w-5 h-5 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" 
-                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                          </svg>
-                        </button>
-                        <!-- Bookmark button – inline style -->
-                        <button @click.stop="toggleBookmark(post.Id)"
-                            class="ml-2 p-2 rounded-full bg-white/10 items-center transition-transform duration-200  active:scale-90"
-                            :class="{ 'text-yellow-400': isBookmarked(post.Id) }">
-                            <svg class="w-5 h-5 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    :class="{ 'fill-yellow-400 stroke-yellow-400': isBookmarked(post.Id) }"
-                                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                            </svg>
-                        </button>
-                    </div>
+                            <!-- Share button – same styling as your bookmark -->
+                            <button @click.stop="sharePost(post.Id, post.Title, post.Summary)"
+                                class=" p-2 items-center transition-transform duration-200  active:scale-90"
+                                aria-label="Share this post">
+                                <svg class="w-5 h-5 drop-shadow-md" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                            </button>
+                            <!-- Bookmark button – inline style -->
+                            <button @click.stop="toggleBookmark(post.Id)"
+                                class="ml-2 p-2 rounded-full bg-white/10 items-center transition-transform duration-200  active:scale-90"
+                                :class="{ 'text-yellow-400': isBookmarked(post.Id) }">
+                                <svg class="w-5 h-5 drop-shadow-md" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        :class="{ 'fill-yellow-400 stroke-yellow-400': isBookmarked(post.Id) }"
+                                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <!-- Title row -->
                     <h2 class="text-xl font-bold" x-text="post.Title"></h2>
                     <!-- Summary row -->
-                    <p class="mt-2 text-sm text-gray-200 transition-opacity duration-300" x-text="post.Summary" x-show="!showArticle"></p>
+                    <p class="mt-2 text-sm text-gray-200 transition-opacity duration-300" x-text="post.Summary"
+                        x-show="!showArticle"></p>
+                        <!-- Loading indicator -->
+                   <!-- <div 
+  x-show="loading && activePost === post.Id" 
+  class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+>
+  <div class="w-12 h-12 border-4 border-gray-300 border-t-gray-500 rounded-full animate-spin"></div>
+</div> -->
+
                     <!-- Content row -->
-                    <div class="prose prose-lg max-w-none text-sm mt-4 content" x-show="showArticle && activePost?.Id === post.Id" x-transition x-html="post.Content"></div>
+                    <div class="prose prose-lg max-w-none text-sm mt-4 content" x-cloak
+                        x-show="showArticle && activePost === post.Id" x-transition x-html="post.Content || ''">
+                    </div>
                     <!-- Metadata row – between title and summary -->
-                    <div class="flex items-center space-x-6 text-xs my-4 opacity-90">
+                    <div class="flex items-center space-x-6 text-xs my-4 opacity-90" x-show="!showArticle">
                         <!-- Likes -->
                         <button @click.stop="toggleLike(post.Id)"
                             class="flex items-center space-x-1.5 transition-all duration-200 hover:scale-105 active:scale-95"
@@ -450,9 +460,22 @@
                             <span x-text="post.meta?.views || '45k'"></span>
                         </div>
                     </div>
-                    
-            </div>
-            </div>
+
+                    <div x-show="loading && activePost === post.Id" class="animate-pulse space-y-4 py-4">
+                        <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+                        <div class="h-3 bg-gray-300 rounded w-full"></div>
+                        <div class="h-3 bg-gray-300 rounded w-5/6"></div>
+                        <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+                        <div class="h-3 bg-gray-300 rounded w-full"></div>
+                        <div class="h-3 bg-gray-300 rounded w-5/6"></div>
+                        
+                        <div class="h-3 bg-gray-300 rounded w-5/6"></div>
+                        <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+
+                    </div>
+
+                </div>
+                </div>
             </section>
         </template>
     </main>
@@ -477,12 +500,12 @@
 
     function blogApp() {
         return {
-            categories: ["Featured",  "Bookmarks"],
+            categories: ["Featured", "Bookmarks"],
             activeCategory: "Featured",
             posts: [],
-            bookmarkedPosts:  new Set(),
+            activePost: null,
+            bookmarkedPosts: new Set(),
             likedPosts: new Set(),
-            activePost: {},
             showArticle: false,
             overlayExpanded: false,
             closing: false,
@@ -490,7 +513,7 @@
             startY: 0,
             currentY: 0,
             endY: 0,
-            dragging: false ,
+            dragging: false,
             async init() {
                 await this.fetchPosts(this.activeCategory);
                 this.handleDeepLink();
@@ -502,17 +525,17 @@
                 let postId = params.get('id');
 
                 if (postId && this.posts.some(p => p.Id === postId)) {
-                  // Open that post automatically
-                  this.openPost(postId);
-                  // Optional: smooth scroll to it
-                  setTimeout(() => {
-                    document.querySelector(`[data-post-id="${postId}"]`)?.scrollIntoView({ behavior: 'smooth' });
-                  }, 300);
+                    // Open that post automatically
+                    this.openPost(postId);
+                    // Optional: smooth scroll to it
+                    setTimeout(() => {
+                        document.querySelector(`[data-post-id="${postId}"]`)?.scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
                 }
             },
 
             async fetchPosts(category) {
-                const res = await fetch("https://www.sableinternational.com/api/blogapp/blogposts?$orderby=PublicationDate desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$top=20");
+                const res = await fetch("https://www.sableinternational.com/api/blogapp/blogposts?$select=Id,Title,Summary,BlogPostMetaTags&$orderby=PublicationDate desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$top=20");
                 const data = await res.json();
                 this.posts = (data.value || data).map(post => ({
                     ...post,
@@ -521,16 +544,16 @@
             },
 
             async openPost(id) {
-                this.loading = true;
-                this.closing = true;
                 this.showArticle = true;
-                this.activePost.Id = id;
-                this.overlayExpanded = false;
-                setTimeout(() => { this.closing = false; }, 10);
+                this.activePost = id;
+                this.loading = true;
                 try {
-                    const res = await fetch(`https://www.sableinternational.com/api/blogapp/blogposts(${id})?$select=Id,Title,Summary,Content`);
+                    const res = await fetch(`https://www.sableinternational.com/api/blogapp/blogposts(${id})?$select=Content`);
                     const data = await res.json();
-                    this.activePost = data;
+
+                    this.posts = this.posts.map(post =>
+                        post.Id === id ? { ...post, Content: data.Content } : post);
+
                 } catch (err) {
                     console.error("Failed to load post", err);
                 } finally {
@@ -538,12 +561,12 @@
                 }
             },
 
-            async sharePost(Id, Title, Summary){
+            async sharePost(Id, Title, Summary) {
                 console.log('shareclick')
                 const shareData = {
-                        title: Title,
-                        text: Summary,
-                        url: `http://localhost:3000/?id=${Id}`
+                    title: Title,
+                    text: Summary,
+                    url: `http://localhost:3000/?id=${Id}`
                 };
                 try {
                     await navigator.share(shareData);
@@ -558,13 +581,13 @@
                     // swipe up expands overlay
                     this.overlayExpanded = true;
                 } else if (delta < -50) {
-                        // dismiss overlay entirely
-                        this.closing = true;
-                        setTimeout(() => {
-                            this.showArticle = false;
-                            this.closing = false;
-                        }, 300);
-                   
+                    // dismiss overlay entirely
+                    this.closing = true;
+                    setTimeout(() => {
+                        this.showArticle = false;
+                        this.closing = false;
+                    }, 300);
+
                 }
             },
 
@@ -598,7 +621,7 @@
                 // e.g. this.showSearchModal = true;
                 alert("Search coming soon!"); // placeholder
             },
-            
+
             isLiked(id) {
                 return this.likedPosts.has(id);
             },
@@ -623,7 +646,7 @@
     }
 
 
-    
+
 
     window.onload = async () => {
         if ('serviceWorker' in navigator) {

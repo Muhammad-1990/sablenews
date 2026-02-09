@@ -359,12 +359,12 @@
       ">
 
     
-        <div class="flex w-full h-full transform-gpu transition-transform duration-500 ease-in-out"
+        <div class="flex w-full h-screen transform-gpu transition-transform duration-500 ease-in-out"
        :style="`transform: translateX(-${activeFeed === 'Bookmarks' ? 100 : 0}%)`">
     
 
         <!-- Featured Feed -->
-        <div class="w-full h-full pt-14 flex-shrink-0 snap-y snap-mandatory overflow-y-scroll scrollbar-hide">
+        <div class="w-full h-screen flex-shrink-0 snap-y snap-mandatory overflow-y-scroll scrollbar-hide">
             <template x-for="post in posts" :key="post.Id">
                 <section :data-post-id="post.Id"
                     class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden"

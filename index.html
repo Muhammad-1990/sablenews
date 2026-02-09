@@ -302,7 +302,7 @@
 
 <body class="bg-black text-white" :class="showArticle ? 'overflow-hidden' : ''" x-data="blogApp()" x-init="init()">
     <!-- Category Tabs -->
-    <nav x-show="!showArticle" class="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm text-white">
+    <nav x-show="!showArticle" class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm text-white">
         <div class="relative flex items-center justify-between px-4 py-2">
             <!-- Scrollable categories area -->
             <div class="flex-1 overflow-x-auto scrollbar-hide whitespace-nowrap ">
@@ -349,50 +349,54 @@
     </nav>
 
     <!-- Snap Feed -->
-    <main class="h-screen snap-y snap-mandatory pt-14" :class="
-        {
-            'overflow-y-scroll': !showArticle && !dragging,
-            'overflow-y-hidden overflow-hidden': showArticle
-        }">
-<div class="flex w-full h-full transform-gpu transition-transform duration-500 ease-in-out"
+    <main class="h-screen scrollbar-hide"
+        :class="{'overflow-y-scroll': !showArticle && !dragging,'overflow-y-hidden overflow-hidden': showArticle}"
+        @touchstart="startX = $event.touches[0].clientX"
+      @touchend="
+        let delta = $event.changedTouches[0].clientX - startX;
+        if (delta > 50) activeFeed = 'Featured';
+        if (delta < -50) activeFeed = 'Bookmarks';
+      ">
+
+    
+        <div class="flex w-full h-full transform-gpu transition-transform duration-500 ease-in-out"
        :style="`transform: translateX(-${activeFeed === 'Bookmarks' ? 100 : 0}%)`">
     
 
         <!-- Featured Feed -->
-        <div class="w-full h-full flex-shrink-0 overflow-y-auto snap-y snap-mandatory">
-
-            <template x-for="post in (activeFeed === 'Bookmarks' ? bookmarkedPosts : posts)" :key="post.Id">
+        <div class="w-full h-full pt-14 flex-shrink-0 snap-y snap-mandatory overflow-y-scroll scrollbar-hide">
+            <template x-for="post in posts" :key="post.Id">
                 <section :data-post-id="post.Id"
-                    class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden" :class="{
-                        'z-60': showArticle && activePost === post.Id,
-                    }">
-
+                    class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden"
+                    :class="{ 'z-60': showArticle && activePost === post.Id }">
+    
                     <div class="relative w-full h-screen">
                         <!-- Blurred background fill -->
                         <img :src="post.meta?.image" class="absolute h-full object-cover blur-md" />
-
+    
                         <!-- Actual image centered -->
                         <img :src="post.meta?.image" class="relative h-[50vh] object-cover shadow-lg" />
                     </div>
-
+    
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+    
                     <div class="absolute bottom-0 left-0 right-0 p-6 overflow-y-auto transform-gpu transition-all duration-300"
                         @click="!showArticle ? openPost(post.Id) : null" :class="{
-                        'h-full bg-black/80 backdrop-blur-sm': showArticle && activePost === post.Id,
-                        'h-80 bg-transparent overflow-y-hidden overflow-hidden': !showArticle || activePost !== post.Id,
-                        'overflow-hidden': dragging || showArticle
-                    }" @touchstart="startY = $event.touches[0].clientY; " @touchmove="
-                    if (startY < 100) {
-                        dragging = true;
-                        currentY = $event.touches[0].clientY;
-                        let delta = currentY - startY;
-                        $el.style.transform = `translateY(${delta}px)`;
-                        if (delta > 50) {
-                            showArticle = false;
-                            dragging = false;
-                            $el.style.transform = `translateY(0px)`;
-                        }
-                    }" @touchend="dragging = false;">
+                                'h-full bg-black/80 backdrop-blur-sm': showArticle && activePost === post.Id,
+                                'h-80 bg-transparent overflow-y-hidden overflow-hidden': !showArticle || activePost !== post.Id,
+                                'overflow-hidden': dragging || showArticle
+                            }" @touchstart="startY = $event.touches[0].clientY; " @touchmove="
+                            if (startY < 100) {
+                                dragging = true;
+                                currentY = $event.touches[0].clientY;
+                                let delta = currentY - startY;
+                                $el.style.transform = `translateY(${delta}px)`;
+                                if (delta > 50) {
+                                    showArticle = false;
+                                    dragging = false;
+                                    $el.style.transform = `translateY(0px)`;
+                                }
+                            }" @touchend="dragging = false;">
                         <!-- Author and date row -->
                         <div class="flex justify-between  items-center">
                             <p class="text-xs" x-text="getAuthorAndDate(post.meta.author,post.LastModified)"></p>
@@ -425,6 +429,14 @@
                         <!-- Summary row -->
                         <p class="mt-2 text-sm text-gray-200 transition-opacity duration-300" x-text="post.Summary"
                             x-show="!showArticle"></p>
+                        <!-- Loading indicator -->
+                        <!-- <div 
+          x-show="loading && activePost === post.Id" 
+          class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        >
+          <div class="w-12 h-12 border-4 border-gray-300 border-t-gray-500 rounded-full animate-spin"></div>
+        </div> -->
+    
                         <!-- Content row -->
                         <div class="prose prose-lg max-w-none text-sm mt-4 content" x-cloak
                             x-show="showArticle && activePost === post.Id" x-transition x-html="post.Content || ''">
@@ -443,13 +455,13 @@
                             </button>
                             <!-- Comments -->
                             <!-- <button @click.stop="openComments(post.Id)"
-                            class="flex items-center space-x-1.5 transition-all duration-200 hover:scale-105 active:scale-95">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z" />
-                            </svg>
-                            <span x-text="post.meta?.comments || '148'"></span>
-                        </button> -->
+                                    class="flex items-center space-x-1.5 transition-all duration-200 hover:scale-105 active:scale-95">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z" />
+                                    </svg>
+                                    <span x-text="post.meta?.comments || '148'"></span>
+                                </button> -->
                             <!-- Views -->
                             <div class="flex items-center space-x-1.5">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -459,7 +471,7 @@
                                 <span x-text="post.meta?.views || '45k'"></span>
                             </div>
                         </div>
-
+    
                         <div x-show="loading && activePost === post.Id" class="animate-pulse space-y-4 py-4">
                             <div class="h-6 bg-gray-300 rounded w-3/4"></div>
                             <div class="h-12 bg-gray-300 rounded w-full"></div>
@@ -472,46 +484,46 @@
                             <div class="h-9 bg-gray-300 rounded w-5/6"></div>
                             <div class="h-3 bg-gray-300 rounded w-5/6"></div>
                             <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+    
                         </div>
+    
                     </div>
-
+    
                 </section>
             </template>
+    
             <div x-ref="loadTrigger" x-show="activeFeed === 'Featured'"></div>
         </div>
-
+    
         <div class="w-full h-full flex-shrink-0 overflow-y-auto px-4">
-
             <div class="grid grid-cols-1 gap-4 pt-4">
-        <template x-for="post in bookmarkedPosts" :key="post.Id">
-          <div class="bg-white/10 rounded-lg overflow-hidden shadow-md transform-gpu transition hover:scale-[1.02]">
-            
-            <!-- Image -->
-            <img :src="post.meta?.image" class="w-full h-40 object-cover" />
-
-            <!-- Content -->
-            <div class="p-4 flex justify-between items-center">
-              <h3 class="text-sm font-semibold text-white truncate" x-text="post.Title"></h3>
-              
-              <!-- Bookmark toggle -->
-              <button @click.stop="toggleBookmark(post.Id)"
-                      class="ml-2 p-2 rounded-full bg-white/10 transition-transform duration-200 active:scale-90"
-                      :class="{ 'text-yellow-400': isBookmarked(post.Id) }">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                        :class="{ 'fill-yellow-400 stroke-yellow-400': isBookmarked(post.Id) }"
-                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              </button>
+                <template x-for="post in bookmarkedPosts" :key="post.Id">
+                    <div
+                        class="bg-white/10 rounded-lg overflow-hidden shadow-md transform-gpu transition hover:scale-[1.02]">
+    
+                        <!-- Image -->
+                        <img :src="post.meta?.image" class="w-full h-40 object-cover" />
+    
+                        <!-- Content -->
+                        <div class="p-4 flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-white truncate" x-text="post.Title"></h3>
+    
+                            <!-- Bookmark toggle -->
+                            <button @click.stop="toggleBookmark(post.Id)"
+                                class="ml-2 p-2 rounded-full bg-white/10 transition-transform duration-200 active:scale-90"
+                                :class="{ 'text-yellow-400': isBookmarked(post.Id) }">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        :class="{ 'fill-yellow-400 stroke-yellow-400': isBookmarked(post.Id) }"
+                                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </template>
             </div>
-          </div>
-        </template>
-      </div>
-
         </div>
-
-        
-        </div>
+    </div>
 
     </main>
 
@@ -561,11 +573,11 @@
                     if (!trigger) return;
 
                     const observer = new IntersectionObserver(entries => {
-                        entries.forEach(async entry => {
-                            if (entry.isIntersecting) await this.fetchPosts();
-                        });
+                      entries.forEach(async entry => {
+                        if (entry.isIntersecting) await this.fetchPosts();
+                      });
                     });
-
+                
                     observer.observe(trigger);
                     await this.fetchPostsFromLocalStorage();
                     this.handleDeepLink();
@@ -589,18 +601,18 @@
 
             async fetchPostsFromApi() {
                 const res = await fetch(
-                    `https://www.sableinternational.com/api/blogapp/blogposts?` +
-                    `$select=Id,Title,Summary,BlogPostMetaTags` +
-                    `&$orderby=PublicationDate desc` +
-                    `&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c` +
-                    `&$skip=${this.skip}&$top=${this.top}`
+                  `https://www.sableinternational.com/api/blogapp/blogposts?` +
+                  `$select=Id,Title,Summary,BlogPostMetaTags` +
+                  `&$orderby=PublicationDate desc` +
+                  `&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c` +
+                  `&$skip=${this.skip}&$top=${this.top}`
                 );
                 const data = await res.json();
                 const newPosts = (data.value || data).map(post => ({
-                    ...post,
-                    meta: parseMetaTags(post.BlogPostMetaTags)
+                  ...post,
+                  meta: parseMetaTags(post.BlogPostMetaTags)
                 }));
-
+            
                 this.posts = [...this.posts, ...newPosts];
                 this.skip += this.top;
                 if (newPosts.length < this.top) this.hasMore = false;
@@ -609,13 +621,13 @@
             fetchPostsFromLocalStorage() {
                 const cached = localStorage.getItem("bookmarkedPosts");
                 if (cached) {
-                    try {
-                        const posts = JSON.parse(cached);
-                        this.bookmarkedPosts = posts;
-                    } catch (err) {
-                        console.error("Failed to parse bookmarks", err);
-                    }
-                }
+                  try {
+                    const posts = JSON.parse(cached);
+                    this.bookmarkedPosts = posts;
+                  } catch (err) {
+                    console.error("Failed to parse bookmarks", err);
+                  }
+                } 
             },
 
             async fetchPosts() {
@@ -625,11 +637,11 @@
                 console.log('Loading posts...');
 
                 if (this.activeFeed === "Featured") {
-                    await this.fetchPostsFromApi();
+                  await this.fetchPostsFromApi();
                 } else if (this.activeFeed === "Bookmarks") {
-                    this.fetchPostsFromLocalStorage();
+                  this.fetchPostsFromLocalStorage();
                 }
-
+            
                 this.postsLoading = false;
             },
 
@@ -703,13 +715,13 @@
 
                 const exists = bookmarks.find(b => b.Id === post.Id);
                 if (exists) {
-                    bookmarks = bookmarks.filter(b => b.Id !== post.Id);
+                  bookmarks = bookmarks.filter(b => b.Id !== post.Id);
                 } else {
-                    bookmarks.push(post);
+                  bookmarks.push(post);
                 }
-
+            
                 localStorage.setItem("bookmarkedPosts", JSON.stringify(bookmarks));
-                this.bookmarkedPosts = bookmarks;
+                this.bookmarkedPosts =bookmarks;
             },
 
             openSearch() {

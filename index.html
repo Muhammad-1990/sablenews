@@ -307,17 +307,17 @@
             <!-- Scrollable categories area -->
             <div class="flex-1 overflow-x-auto scrollbar-hide whitespace-nowrap ">
                 <div class="flex justify-start space-x-6 min-w-max">
-                    <template x-for="cat in categories" :key="cat">
-                        <button @click="activeCategory = cat; fetchPosts(cat)"
+                    <template x-for="feed in feeds" :key="feed">
+                        <button @click="activeFeed = feed;"
                             class="relative py-2 text-white text-xs font-light transition-colors">
-                            <span x-text="cat"></span>
+                            <span x-text="feed"></span>
 
                             <!-- Small underline indicator (you had w-6 h-0.5 – kept it) -->
                             <span
                                 class="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-0.5 rounded-full bg-white transform-gpu transition-all duration-300 origin-center"
                                 :class="{
-                                'opacity-100 scale-x-100': activeCategory === cat,
-                                'opacity-0 scale-x-0': activeCategory !== cat
+                                'opacity-100 scale-x-100': activeFeed === feed,
+                                'opacity-0 scale-x-0': activeFeed !== feed
                             }"></span>
                         </button>
                     </template>
@@ -348,13 +348,24 @@
         </div>
     </nav>
 
-    <!-- Snap Feed -->
-    <main class="h-screen snap-y snap-mandatory pt-14" :class="
-        {
-            'overflow-y-scroll': !showArticle && !dragging,
-            'overflow-y-hidden overflow-hidden': showArticle
-        }">
-        <template x-for="post in posts" :key="post.Id">
+    <main class="h-screen overflow-hidden pt-14 relative"
+      @touchstart="startX = $event.touches[0].clientX"
+      @touchend="
+        let delta = $event.changedTouches[0].clientX - startX;
+        if (delta > 50) activeFeed = 'Featured';
+        if (delta < -50) activeFeed = 'Bookmarks';
+      ">
+  
+  <div class="flex w-full h-full transform-gpu transition-transform duration-500 ease-in-out"
+       :style="`transform: translateX(-${activeFeed === 'Bookmarks' ? 100 : 0}%)`">
+    
+   <div class="w-full h-full flex-shrink-0 overflow-y-auto snap-y snap-mandatory">
+      <!-- your existing featured template -->
+    
+
+
+        <template x-for="post in posts" :key="activeFeed + '-' + post.Id">
+
             <section :data-post-id="post.Id"
                 class="h-screen w-full relative snap-center snap-always cursor-pointer overflow-hidden" :class="{
                         'z-60': showArticle && activePost === post.Id,
@@ -401,7 +412,7 @@
                                 </svg>
                             </button>
                             <!-- Bookmark button – inline style -->
-                            <button @click.stop="toggleBookmark(post.Id)"
+                            <button @click.stop="toggleBookmark(post)"
                                 class="ml-2 p-2 rounded-full bg-white/10 items-center transition-transform duration-200  active:scale-90"
                                 :class="{ 'text-yellow-400': isBookmarked(post.Id) }">
                                 <svg class="w-5 h-5 drop-shadow-md" fill="none" stroke="currentColor"
@@ -477,11 +488,45 @@
                     </div>
 
                 </div>
-                </div>
+              
             </section>
         </template>
-        <div x-ref="loadTrigger"></div>
-    </main>
+
+         </div>
+
+    <!-- Bookmarks Feed -->
+    <div class="w-full h-full flex-shrink-0 overflow-y-auto px-4">
+      <div class="grid grid-cols-1 gap-4 pt-4">
+        <template x-for="post in bookmarkedPosts" :key="post.Id">
+          <div class="bg-white/10 rounded-lg overflow-hidden shadow-md transform-gpu transition hover:scale-[1.02]">
+            
+            <!-- Image -->
+            <img :src="post.meta?.image" class="w-full h-40 object-cover" />
+
+            <!-- Content -->
+            <div class="p-4 flex justify-between items-center">
+              <h3 class="text-sm font-semibold text-white truncate" x-text="post.Title"></h3>
+              
+              <!-- Bookmark toggle -->
+              <button @click.stop="toggleBookmark(post.Id)"
+                      class="ml-2 p-2 rounded-full bg-white/10 transition-transform duration-200 active:scale-90"
+                      :class="{ 'text-yellow-400': isBookmarked(post.Id) }">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        :class="{ 'fill-yellow-400 stroke-yellow-400': isBookmarked(post.Id) }"
+                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+     <p  x-cloak x-show="activeFeed === 'Bookmarks' && posts.length === 0" x-text="'empty'"></p>
+        <div x-ref="loadTrigger" x-show="activeFeed === 'Featured'"></div>
+</main>
 
 </body>
 
@@ -504,8 +549,8 @@
 
     function blogApp() {
         return {
-            categories: ["Featured", "Bookmarks"],
-            activeCategory: "Featured",
+            feeds: ["Featured", "Bookmarks"],
+            activeFeed: "Featured",
             posts: [],
             activePost: null,
             skip: 0,
@@ -513,7 +558,7 @@
             postsLoading: false,
             hasMore: true,
 
-            bookmarkedPosts: new Set(),
+            bookmarkedPosts: [],
             likedPosts: new Set(),
             showArticle: false,
             overlayExpanded: false,
@@ -530,12 +575,12 @@
 
                     const observer = new IntersectionObserver(entries => {
                       entries.forEach(async entry => {
-                        if (entry.isIntersecting) await this.fetchPosts(this.activeCategory);
+                        if (entry.isIntersecting) await this.fetchPosts();
                       });
                     });
                 
                     observer.observe(trigger);
-                    await this.fetchPosts(this.activeCategory); // initial load
+                    await this.fetchPostsFromLocalStorage();
                     this.handleDeepLink();
                 });
             },
@@ -555,24 +600,51 @@
                 }
             },
 
-            async fetchPosts(category) {
-      if (this.postsLoading || !this.hasMore) return;
-      this.postsLoading = true;
+            async fetchPostsFromApi() {
+                const res = await fetch(
+                  `https://www.sableinternational.com/api/blogapp/blogposts?` +
+                  `$select=Id,Title,Summary,BlogPostMetaTags` +
+                  `&$orderby=PublicationDate desc` +
+                  `&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c` +
+                  `&$skip=${this.skip}&$top=${this.top}`
+                );
+                const data = await res.json();
+                const newPosts = (data.value || data).map(post => ({
+                  ...post,
+                  meta: parseMetaTags(post.BlogPostMetaTags)
+                }));
+            
+                this.posts = [...this.posts, ...newPosts];
+                this.skip += this.top;
+                if (newPosts.length < this.top) this.hasMore = false;
+            },
 
-      const res = await fetch(
-        `https://www.sableinternational.com/api/blogapp/blogposts?$select=Id,Title,Summary,BlogPostMetaTags&$orderby=PublicationDate desc&$filter=ParentId eq b92c94f8-ab99-4522-b9e1-0f194960f07c&$skip=${this.skip}&$top=${this.top}`
-      );
-      const data = await res.json();
-      const newPosts = (data.value || data).map(post => ({
-        ...post,
-        meta: parseMetaTags(post.BlogPostMetaTags)
-      }));
+            fetchPostsFromLocalStorage() {
+                const cached = localStorage.getItem("bookmarkedPosts");
+                if (cached) {
+                  try {
+                    const posts = JSON.parse(cached);
+                    this.bookmarkedPosts = posts;
+                  } catch (err) {
+                    console.error("Failed to parse bookmarks", err);
+                  }
+                } 
+            },
 
-      this.posts = [...this.posts, ...newPosts];
-      this.skip += this.top;
-      if (newPosts.length < this.top) this.hasMore = false; // no more posts
-      this.postsLoading = false;
-    },
+            async fetchPosts() {
+                console.log('Fetching posts for feed:', this.activeFeed);
+                if (this.postsLoading) return;
+                this.postsLoading = true;
+                console.log('Loading posts...');
+
+                if (this.activeFeed === "Featured") {
+                  await this.fetchPostsFromApi();
+                } else if (this.activeFeed === "Bookmarks") {
+                  this.fetchPostsFromLocalStorage();
+                }
+            
+                this.postsLoading = false;
+            },
 
             async openPost(id) {
                 this.showArticle = true;
@@ -636,16 +708,21 @@
             },
 
             isBookmarked(id) {
-                return this.bookmarkedPosts.has(id);
+                return this.bookmarkedPosts.find(b => b.Id === id);
             },
 
-            toggleBookmark(id) {
-                if (this.bookmarkedPosts.has(id)) {
-                    this.bookmarkedPosts.delete(id);
+            toggleBookmark(post) {
+                let bookmarks = JSON.parse(localStorage.getItem("bookmarkedPosts") || "[]");
+
+                const exists = bookmarks.find(b => b.Id === post.Id);
+                if (exists) {
+                  bookmarks = bookmarks.filter(b => b.Id !== post.Id);
                 } else {
-                    this.bookmarkedPosts.add(id);
+                  bookmarks.push(post);
                 }
-                this.bookmarkedPosts = new Set(this.bookmarkedPosts); // trigger reactivity
+            
+                localStorage.setItem("bookmarkedPosts", JSON.stringify(bookmarks));
+                this.bookmarkedPosts =bookmarks;
             },
 
             openSearch() {
